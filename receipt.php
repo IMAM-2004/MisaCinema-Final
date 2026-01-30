@@ -18,22 +18,16 @@ try {
 
     if (!$booking) { echo "Booking not found."; exit(); }
 
-    // --- LOGIC PENENTUAN NAMA CUSTOMER (UPDATED & FIXED) ---
+    // --- LOGIC NAMA CUSTOMER ---
     $customerName = 'Guest';
-
-    // 1. Check data dari Booking Database dulu
     if (isset($booking['customer_name'])) {
         $dbName = $booking['customer_name'];
-        
-        // Kalau data DB adalah Object/Array (BSONDocument), kita korek nama dari dalam
         if (is_object($dbName) || is_array($dbName)) {
             $customerName = isset($dbName['fullname']) ? $dbName['fullname'] : (isset($dbName['username']) ? $dbName['username'] : 'Valued Customer');
         } else {
-            // Kalau string biasa, guna terus
             $customerName = $dbName;
         }
     } 
-    // 2. Kalau tak ada dalam DB, check Session user sekarang
     elseif (isset($_SESSION['user'])) {
         $user = $_SESSION['user'];
         if (is_object($user) || is_array($user)) {
@@ -42,8 +36,6 @@ try {
             $customerName = $user;
         }
     }
-    // -------------------------------------------------------
-
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage(); exit();
 }
@@ -59,6 +51,7 @@ try {
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         body {
@@ -77,10 +70,8 @@ try {
             box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
             position: relative;
         }
-        
         .ticket-header { background: #dc3545; padding: 20px; text-align: center; color: white; border-bottom: 2px dashed #fff; }
         .ticket-header h2 { margin: 0; font-size: 1.5rem; text-transform: uppercase; }
-        
         .ticket-body { padding: 25px; }
 
         .info-group { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -90,19 +81,28 @@ try {
         .seats-value { color: #dc3545; font-size: 1.2rem; }
 
         .qr-section { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #ccc; }
+        
+        /* Box QR Code */
         .qr-box {
-            background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $bookingId; ?>') no-repeat center;
-            background-size: contain; width: 120px; height: 120px; margin: 0 auto;
+            width: 120px; 
+            height: 120px; 
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .ticket-id { font-size: 0.7rem; color: #aaa; margin-top: 10px; font-family: monospace; }
+        /* Pastikan gambar QR fit dalam kotak */
+        .qr-box img {
+            max-width: 100%;
+        }
 
+        .ticket-id { font-size: 0.7rem; color: #aaa; margin-top: 10px; font-family: monospace; }
         .btn-group { width: 350px; display: flex; gap: 10px; margin-top: 10px;}
         .btn { flex: 1; padding: 15px; text-align: center; text-decoration: none; font-weight: bold; text-transform: uppercase; border-radius: 5px; cursor: pointer; border:none; font-family: inherit;}
         .btn-home { background: #222; color: white; }
         .btn-home:hover { background: #444; }
         .btn-download { background: #fff; color: #dc3545; font-weight: 800;}
         .btn-download:hover { background: #f0f0f0; }
-        
         .status-badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; margin-top: 5px; }
     </style>
 </head>
@@ -126,7 +126,6 @@ try {
                 <span class="label">Movie</span>
                 <span class="value">
                     <?php 
-                        // Protection kalau movie_name pun object
                         $mName = isset($booking['movie_name']) ? $booking['movie_name'] : '-';
                         echo is_string($mName) ? htmlspecialchars($mName) : 'Movie'; 
                     ?>
@@ -159,7 +158,6 @@ try {
                 <span class="value seats-value">
                     <?php 
                         if (isset($booking['seats'])) {
-                            // Check sama ada object/array atau string
                             if (is_array($booking['seats']) || is_object($booking['seats'])) {
                                 echo htmlspecialchars(implode(", ", (array)$booking['seats']));
                             } else {
@@ -178,7 +176,7 @@ try {
             </div>
 
             <div class="qr-section">
-                <div class="qr-box"></div>
+                <div id="qrcode" class="qr-box"></div>
                 <div class="ticket-id">Ref: <?php echo $bookingId; ?></div>
                 <p style="font-size:0.7rem; color:#888;">Show this QR at the cinema entrance.</p>
             </div>
@@ -194,12 +192,37 @@ try {
 <script>
     const { jsPDF } = window.jspdf;
 
+    // 1. GENERATE QR CODE MASA PAGE LOAD
+    window.onload = function() {
+        var qrContainer = document.getElementById("qrcode");
+        
+        // Bersihkan kalau ada sisa
+        qrContainer.innerHTML = "";
+
+        // Guna library QRCode.js untuk lukis
+        new QRCode(qrContainer, {
+            text: "<?php echo (string)$bookingId; ?>",
+            width: 120,
+            height: 120,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Auto download lepas 1.5 saat (bagi masa QR siap lukis)
+        setTimeout(function() {
+            // downloadPDF(); // Uncomment kalau nak auto download
+        }, 1500); 
+    };
+
     function downloadPDF() {
         const ticketContainer = document.querySelector('.ticket-container');
 
+        // Tak perlu risau pasal CORS sebab QR ni local punya
         html2canvas(ticketContainer, {
             scale: 2,
-            backgroundColor: "#ffffff"
+            backgroundColor: "#ffffff",
+            logging: true
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const doc = new jsPDF('p', 'mm', 'a4'); 
@@ -210,14 +233,11 @@ try {
 
             doc.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
             doc.save('MisaCinema-Ticket-<?php echo $bookingId; ?>.pdf');
+        }).catch(err => {
+            console.error("Error generating PDF:", err);
+            alert("Failed to generate PDF. Check console for details.");
         });
     }
-
-    window.onload = function() {
-        setTimeout(function() {
-            downloadPDF();
-        }, 1000); 
-    };
 </script>
 
 </body>
