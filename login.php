@@ -126,10 +126,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif; ?>
 
         <form method="POST">
-            <input type="email" name="email" placeholder="Email Address" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn">LOGIN TO ACCOUNT</button>
-        </form>
+    <input type="email" name="email" placeholder="Email Address" required>
+    <input type="password" name="password" placeholder="Password" required>
+    
+    <div style="text-align: right; margin-bottom: 15px; font-size: 0.8em;">
+        <a href="forgot_password.php" style="color: #aaa; text-decoration: none;">Forgot Password?</a>
+    </div>
+
+    <button type="submit" class="btn">LOGIN TO ACCOUNT</button>
+</form>
 
         <div class="link">
             New to MisaCinema? <a href="register.php">Register here</a>
@@ -137,4 +142,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
 </body>
+
 </html>
