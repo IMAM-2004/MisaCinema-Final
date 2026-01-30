@@ -4,11 +4,38 @@ $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongo
 $usersCollection = $client->misacinema_db->users;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $fullname = $_POST['fullname'];
+    $phone = $_POST['phone'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // --- 1. VALIDATION CHECK ---
+    
+    // Check Email (Format Valid & Ada @)
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "<script>alert('Invalid Email! Please include @ and a valid domain.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Check Password (Min 6 Character)
+    if (strlen($password) < 6) {
+        echo "<script>alert('Password too short! Must be at least 6 characters.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Check Password (Mesti ada Huruf DAN Nombor)
+    if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        echo "<script>alert('Password must contain both LETTERS and NUMBERS.'); window.history.back();</script>";
+        exit();
+    }
+
+    // --- 2. JIKA LULUS, BARU MASUK DATABASE ---
+
     $newUser = [
-        'fullname' => $_POST['fullname'],
-        'phone' => $_POST['phone'],
-        'email' => $_POST['email'],
-        'password' => $_POST['password'], // Note: Utk production, sebaiknya hash password ni.
+        'fullname' => $fullname,
+        'phone' => $phone,
+        'email' => $email,
+        'password' => $password, // Note: Hash password nanti kalau nak lagi power
         'role' => 'customer',
         'joined_at' => date("Y-m-d H:i:s")
     ];
@@ -43,12 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .register-box { 
-            background: rgba(20, 20, 20, 0.95); /* Gelap transparent sikit */
+            background: rgba(20, 20, 20, 0.95);
             padding: 40px; 
             border-radius: 8px; 
             width: 400px; 
             border: 1px solid #333; 
-            box-shadow: 0px 0px 25px rgba(0,0,0,0.8); /* Shadow bagi timbul */
+            box-shadow: 0px 0px 25px rgba(0,0,0,0.8);
         }
 
         .header { 
@@ -103,6 +130,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .link { text-align: center; margin-top: 20px; font-size: 0.9em; color: #aaa; }
         .link a { color: #e50914; text-decoration: none; font-weight: bold; }
         .link a:hover { text-decoration: underline; }
+        
+        /* Tambahan CSS sikit untuk hint password */
+        .hint { font-size: 0.7em; color: #666; margin-top: -10px; margin-bottom: 10px; display: block;}
     </style>
 </head>
 <body>
@@ -121,10 +151,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" name="phone" required>
 
             <label>EMAIL ADDRESS</label>
-            <input type="email" name="email" required>
+            <input type="email" name="email" required placeholder="example@mail.com">
 
             <label>CREATE PASSWORD</label>
-            <input type="password" name="password" required>
+            <input type="password" name="password" required placeholder="Min 6 chars (Letters & Numbers)">
+            <span class="hint">* Must contain letters & numbers</span>
 
             <button type="submit" class="btn">REGISTER ACCOUNT</button>
         </form>
