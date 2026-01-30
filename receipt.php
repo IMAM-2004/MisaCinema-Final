@@ -211,7 +211,7 @@ try {
 
         // Auto download lepas 1.5 saat (bagi masa QR siap lukis)
         setTimeout(function() {
-            // downloadPDF(); // Uncomment kalau nak auto download
+             downloadPDF(); // <--- DAH UNCOMMENT, SEKARANG DIA AKAN JALAN!
         }, 1500); 
     };
 
