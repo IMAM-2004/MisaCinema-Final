@@ -242,5 +242,7 @@ usort($showtimes, function($a, $b) { return strcmp($a['datetime'], $b['datetime'
             </table>
         </div>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
+
 </html>
