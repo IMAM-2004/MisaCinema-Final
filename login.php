@@ -140,7 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             New to MisaCinema? <a href="register.php">Register here</a>
         </div>
     </div>
-
+<?php include 'footer.php'; ?>
 </body>
 
 </html>
+
