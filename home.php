@@ -251,10 +251,8 @@ $senaraiMovie = $collection->find([]);
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2024 Misa Cinema. All Rights Reserved.</p>
-    </footer>
 <?php include 'footer.php'; ?>
 </body>
 
 </html>
+
