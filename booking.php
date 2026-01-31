@@ -357,5 +357,7 @@ foreach ($existingBookings as $b) {
         }
     }
 </script>
+    <?php include 'footer.php'; ?>
 </body>
+
 </html>
