@@ -144,5 +144,7 @@ if (isset($_POST['delete_id'])) {
             </table>
         </div>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
+
 </html>
