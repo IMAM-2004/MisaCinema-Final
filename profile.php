@@ -184,6 +184,7 @@ $pic = isset($user['profile_pic']) ? "uploads/".$user['profile_pic'] : "https://
             <a href="logout.php" style="color: #e50914;">Logout</a>
         </div>
     </div>
-
+<?php include 'footer.php'; ?>
 </body>
+
 </html>
