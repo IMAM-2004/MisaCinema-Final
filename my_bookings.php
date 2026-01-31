@@ -220,6 +220,7 @@ $myBookings = $collection->find($filter, ['sort' => ['_id' => -1]]);
     <?php endif; ?>
 
 </div>
-
+<?php include 'footer.php'; ?>
 </body>
+
 </html>
