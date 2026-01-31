@@ -219,5 +219,7 @@ $bookings = $bookingCollection->find([], ['sort' => ['_id' => -1]]);
             </table>
         </div>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
+
 </html>
