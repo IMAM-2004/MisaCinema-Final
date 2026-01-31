@@ -140,8 +140,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             New to MisaCinema? <a href="register.php">Register here</a>
         </div>
     </div>
+<style>
+    /* Fix untuk pastikan footer duduk diam-diam kat bawah */
+    footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
+    }
+</style>
+
 <?php include 'footer.php'; ?>
 </body>
 
 </html>
+
 
