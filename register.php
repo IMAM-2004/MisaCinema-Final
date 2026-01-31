@@ -164,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Already have an account? <a href="login.php">Login Here</a>
         </div>
     </div>
-
+<?php include 'footer.php'; ?>
 </body>
 </html>
+
