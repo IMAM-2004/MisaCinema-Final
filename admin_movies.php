@@ -268,5 +268,7 @@ $movies = $movieCollection->find();
             <?php endforeach; ?>
         </div>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
+
 </html>
