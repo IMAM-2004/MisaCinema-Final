@@ -141,13 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 <style>
-    /* Fix untuk pastikan footer duduk diam-diam kat bawah */
+    /* Kita guna 'fixed' supaya dia tak kacau layout flexbox login */
     footer {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        z-index: 100;
+        z-index: 10; /* Pastikan dia duduk atas background */
     }
 </style>
 
@@ -155,5 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 
 </html>
+
 
 
