@@ -281,6 +281,7 @@ foreach ($allMovies as $m) {
         </div>
 
         <br><br> </div>
-
+<?php include 'footer.php'; ?>
 </body>
+
 </html>
