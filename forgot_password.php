@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // ACTION 2: UPDATE PASSWORD
+    // ACTION 2: UPDATE PASSWORD (YANG SAYA DAH BETULKAN)
     if (isset($_POST['reset_password'])) {
         $new_pass = $_POST['new_password'];
         $confirm_pass = $_POST['confirm_password'];
@@ -36,10 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($new_pass === $confirm_pass) {
             if (strlen($new_pass) >= 6) {
-                // Update MongoDB
+                
+                // --- INI PERUBAHAN PENTING ---
+                // Kita tukar password biasa jadi Hash (kod rahsia) sebelum simpan
+                $hashed_password = password_hash($new_pass, PASSWORD_DEFAULT);
+
+                // Update MongoDB dengan password yang dah di-hash
                 $usersCollection->updateOne(
                     ['email' => $email],
-                    ['$set' => ['password' => $new_pass]]
+                    ['$set' => ['password' => $hashed_password]] 
                 );
                 
                 $success = "Password updated successfully! <a href='login.php'>Login Now</a>";
@@ -63,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Forgot Password - Misa Cinema</title>
+    <link rel="icon" type="image/jpeg" href="assets/img/logo_misa.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -89,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .success { color: #00C851; font-size: 1.1em; margin-bottom: 15px; }
         .back-link { display: block; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 0.8em;}
         .back-link:hover { color: white; }
+        /* Style untuk success link */
+        .success a { color: #e50914; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
