@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <a href='http://localhost/misa/login.php'>Login Sekarang</a>
                     ";
 
-                    $mail->send();
+                    //$mail->send();
                     
                 } catch (Exception $e) {
                     // Kalau email gagal, KITA DIAMKAN SAHAJA.
