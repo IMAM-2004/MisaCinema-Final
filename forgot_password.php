@@ -21,14 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($user) {
             // User found! Move to Step 2
-            $_SESSION['reset_email'] = $email; // Store email temporarily
+            $_SESSION['reset_email'] = $email; 
             $step = 2;
         } else {
             $error = "No account found with that Email and Phone number.";
         }
     }
 
-    // ACTION 2: UPDATE PASSWORD (YANG SAYA DAH BETULKAN)
+    // ACTION 2: UPDATE PASSWORD
     if (isset($_POST['reset_password'])) {
         $new_pass = $_POST['new_password'];
         $confirm_pass = $_POST['confirm_password'];
@@ -37,27 +37,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($new_pass === $confirm_pass) {
             if (strlen($new_pass) >= 6) {
                 
-                // --- INI PERUBAHAN PENTING ---
-                // Kita tukar password biasa jadi Hash (kod rahsia) sebelum simpan
+                // Hash Password
                 $hashed_password = password_hash($new_pass, PASSWORD_DEFAULT);
 
-                // Update MongoDB dengan password yang dah di-hash
+                // Update MongoDB
                 $usersCollection->updateOne(
                     ['email' => $email],
                     ['$set' => ['password' => $hashed_password]] 
                 );
                 
                 $success = "Password updated successfully! <a href='login.php'>Login Now</a>";
-                // Clear session
                 unset($_SESSION['reset_email']);
-                $step = 3; // Step 3: Success Message
+                $step = 3; 
             } else {
                 $error = "Password must be at least 6 characters.";
-                $step = 2; // Stay on reset form
+                $step = 2; 
             }
         } else {
             $error = "Passwords do not match!";
-            $step = 2; // Stay on reset form
+            $step = 2; 
         }
     }
 }
@@ -70,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Forgot Password - Misa Cinema</title>
     <link rel="icon" type="image/jpeg" href="assets/img/logo_misa.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body { 
             background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('assets/images/bg_cinema.png');
@@ -82,20 +82,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border: 1px solid #333; text-align: center;
         }
         h2 { color: #e50914; margin-bottom: 20px; }
+        
         input { 
             width: 100%; padding: 12px; background: #333; border: 1px solid #444; 
             color: white; margin-bottom: 15px; border-radius: 4px; box-sizing: border-box; 
         }
+        input:focus { outline: none; border-color: #e50914; }
+
+        /* --- PASSWORD CONTAINER & EYE ICON --- */
+        .password-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .password-container input {
+            margin-bottom: 0;
+            padding-right: 40px; /* Space for the icon */
+        }
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1em;
+            z-index: 10;
+        }
+        .toggle-password:hover { color: white; }
+
         .btn { 
             width: 100%; padding: 12px; background: #e50914; color: white; border: none; 
-            font-weight: bold; border-radius: 4px; cursor: pointer; 
+            font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px;
         }
         .btn:hover { background: #ff0f1f; }
         .error { color: #ff4444; font-size: 0.9em; margin-bottom: 15px; }
         .success { color: #00C851; font-size: 1.1em; margin-bottom: 15px; }
         .back-link { display: block; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 0.8em;}
         .back-link:hover { color: white; }
-        /* Style untuk success link */
         .success a { color: #e50914; font-weight: bold; text-decoration: none; }
     </style>
 </head>
@@ -121,8 +145,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if($error) echo "<div class='error'>$error</div>"; ?>
 
             <form method="POST">
-                <input type="password" name="new_password" placeholder="New Password" required>
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                <div class="password-container">
+                    <input type="password" name="new_password" id="newPass" placeholder="New Password" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePass('newPass', this)"></i>
+                </div>
+
+                <div class="password-container">
+                    <input type="password" name="confirm_password" id="confirmPass" placeholder="Confirm Password" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePass('confirmPass', this)"></i>
+                </div>
+
                 <button type="submit" name="reset_password" class="btn">UPDATE PASSWORD</button>
             </form>
 
@@ -133,6 +165,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <a href="login.php" class="back-link">Back to Login</a>
     </div>
+
+    <script>
+        function togglePass(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            
+            if (input.type === 'password') {
+                input.type = 'text'; // Show
+                iconElement.classList.remove('fa-eye');
+                iconElement.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password'; // Hide
+                iconElement.classList.remove('fa-eye-slash');
+                iconElement.classList.add('fa-eye');
+            }
+        }
+    </script>
 
 </body>
 </html>

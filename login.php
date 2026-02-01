@@ -6,15 +6,15 @@ require 'vendor/autoload.php';
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $usersCollection = $client->misacinema_db->users;
 
-// Variable untuk simpan error local (kotak merah dalam form)
+// Variable to store local error (red box in form)
 $localError = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $pass = $_POST['password'];
-    $role = $_POST['role']; // customer atau admin
+    $role = $_POST['role']; // customer or admin
 
-    // --- 1. LOGIN SEBAGAI ADMIN (Hardcoded) ---
+    // --- 1. LOGIN AS ADMIN (Hardcoded) ---
     if ($role == 'admin') {
         if ($email == 'admin@gmail.com' && $pass == '123') {
             $_SESSION['user'] = 'Administrator';
@@ -22,22 +22,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header("Location: admin.php");
             exit();
         } else {
-            $localError = "Salah Email atau Password Admin!";
+            $localError = "Invalid Admin Email or Password!";
         }
     } 
-    // --- 2. LOGIN SEBAGAI CUSTOMER (MongoDB) ---
+    // --- 2. LOGIN AS CUSTOMER (MongoDB) ---
     else {
-        // Cari user berdasarkan EMAIL sahaja dulu
+        // Find user by EMAIL only first
         $user = $usersCollection->findOne(['email' => $email]);
 
-        // Kalau user wujud DAN password dia match dengan hash
+        // If user exists AND password matches hash
         if ($user && password_verify($pass, $user['password'])) {
             $_SESSION['user'] = (array)$user; 
             $_SESSION['role'] = 'customer';
             header("Location: home.php");
             exit();
         } else {
-            $localError = "Email atau Password customer salah!";
+            $localError = "Invalid Customer Email or Password!";
         }
     }
 }
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         h1 { color: #e50914; margin-bottom: 20px; letter-spacing: 2px; }
         
-        /* --- STYLE BARU UNTUK BUTTON PILIHAN (TOGGLE) --- */
+        /* --- ROLE SWITCH BUTTONS --- */
         .role-switch {
             display: flex;
             justify-content: center;
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .role-btn.active {
-            background: #e50914; /* Warna Merah Misa */
+            background: #e50914; 
             color: white;
             box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
         }
@@ -125,6 +125,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-sizing: border-box; 
         }
 
+        input:focus { outline: none; border-color: #e50914; }
+
+        /* --- NEW PASSWORD WRAPPER FOR EYE ICON --- */
+        .password-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .password-container input {
+            margin-bottom: 0; /* Remove margin from input, keep it on container */
+            padding-right: 45px; /* Make space for the eye icon so text doesn't overlap */
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1.1em;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover { color: white; }
+
+        /* --- BUTTONS & LINKS --- */
         .btn { 
             width: 100%; 
             padding: 15px; 
@@ -167,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <i class="fas fa-check-circle"></i> 
                 <?php 
                     echo $_SESSION['success']; 
-                    unset($_SESSION['success']); // Padam lepas refresh
+                    unset($_SESSION['success']); 
                 ?>
             </div>
         <?php endif; ?>
@@ -198,7 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="hidden" name="role" id="roleInput" value="customer">
 
             <input type="email" name="email" placeholder="Email Address" required>
-            <input type="password" name="password" placeholder="Password" required>
+
+            <div class="password-container">
+                <input type="password" name="password" id="passwordInput" placeholder="Password" required>
+                <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+            </div>
             
             <div style="text-align: right; margin-bottom: 15px; font-size: 0.8em;">
                 <a href="forgot_password.php" style="color: #aaa; text-decoration: none;">Forgot Password?</a>
@@ -213,19 +245,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script>
+        // Function to toggle User/Admin role
         function setRole(role) {
-            // 1. Update hidden input value
             document.getElementById('roleInput').value = role;
-
-            // 2. Update visual button (Warna Merah)
             const buttons = document.querySelectorAll('.role-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
 
-            // Cari button yang kena klik dan tambah class active
             if(role === 'customer') {
                 buttons[0].classList.add('active');
             } else {
                 buttons[1].classList.add('active');
+            }
+        }
+
+        // Function to toggle Password Visibility (Eye Icon)
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text'; // Show Password
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash'); // Change Icon to Crossed Eye
+            } else {
+                passwordInput.type = 'password'; // Hide Password
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye'); // Change Icon back to Normal Eye
             }
         }
     </script>

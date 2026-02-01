@@ -51,10 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($insertResult->getInsertedCount() > 0) {
                 
                 // --- 4. EMAIL SECTION (COMMENTED OUT FOR PERFORMANCE) ---
-                // NOTE TO LECTURER: This code is fully functional on localhost.
-                // It is commented out on the live server because the free hosting provider 
-                // blocks SMTP ports, causing a timeout error (HTTP 500).
-                
                 /* try {
                     $mail = new PHPMailer(true);
                     $mail->isSMTP();
@@ -76,11 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } catch (Exception $e) { } 
                 */
 
-                // --- 5. REDIRECT TO LOGIN (The "Kick" Logic) ---
-                // This line sends the user straight to login.php
+                // --- 5. REDIRECT TO LOGIN ---
                 $_SESSION['success'] = "Registration Successful! Please login.";
                 header("Location: login.php"); 
-                exit(); // Stop the script immediately so it redirects
+                exit();
             }
         }
     }
@@ -94,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Register - Misa Cinema</title>
     <link rel="icon" type="image/jpeg" href="assets/img/logo_misa.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body { 
@@ -126,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 8px 8px 0 0; 
         }
         h2 { margin: 0; font-size: 1.5em; letter-spacing: 1px; }
+        
         input { 
             width: 100%; 
             padding: 12px; 
@@ -137,7 +134,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-sizing: border-box; 
         }
         input:focus { outline: none; border-color: #e50914; }
+        
         label { font-size: 0.8em; color: #aaa; display: block; margin-bottom: 5px; font-weight: bold; }
+        
+        /* --- NEW STYLES FOR PASSWORD EYE --- */
+        .password-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5px; /* Reduced margin because of hint below */
+        }
+        .password-container input {
+            margin-bottom: 0;
+            padding-right: 40px; /* Space for the icon */
+        }
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1em;
+            z-index: 10;
+        }
+        .toggle-password:hover { color: white; }
+
         .btn { 
             width: 100%; padding: 15px; background: #e50914; color: white; border: none; 
             font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background 0.3s;
@@ -145,7 +166,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .btn:hover { background: #ff0f1f; }
         .link { text-align: center; margin-top: 20px; font-size: 0.9em; color: #aaa; }
         .link a { color: #e50914; text-decoration: none; font-weight: bold; }
-        .hint { font-size: 0.7em; color: #666; margin-top: -10px; margin-bottom: 10px; display: block;}
+        
+        .hint { font-size: 0.7em; color: #666; margin-top: 5px; margin-bottom: 15px; display: block;}
+        
         .alert-error {
             background-color: #f8d7da; color: #721c24; padding: 10px; 
             margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.9em;
@@ -174,7 +197,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="email" name="email" required placeholder="example@gmail.com" value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
 
             <label>CREATE PASSWORD</label>
-            <input type="password" name="password" required placeholder="Min 6 chars (Letters & Numbers)">
+            
+            <div class="password-container">
+                <input type="password" name="password" id="passwordInput" required placeholder="Min 6 chars (Letters & Numbers)">
+                <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+            </div>
+
             <span class="hint">* Must contain letters & numbers</span>
 
             <button type="submit" class="btn">REGISTER ACCOUNT</button>
@@ -184,5 +212,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Already have an account? <a href="login.php">Login Here</a>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text'; // Show Password
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash'); // Cross icon
+            } else {
+                passwordInput.type = 'password'; // Hide Password
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye'); // Normal icon
+            }
+        }
+    </script>
 </body>
 </html>
