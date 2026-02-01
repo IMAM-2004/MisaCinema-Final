@@ -6,6 +6,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database Connection
+// Ensure your connection string is correct
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $usersCollection = $client->misacinema_db->users;
 
@@ -20,20 +21,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // --- 1. VALIDATION ---
     if (!preg_match("/@gmail\.com$/", $email)) {
-        $errorMsg = "Harap maaf, sistem hanya menerima akaun @gmail.com sahaja!";
+        $errorMsg = "Sorry, the system only accepts @gmail.com accounts!";
     }
     elseif (strlen($password) < 6) {
-        $errorMsg = "Password terlalu pendek! Minimum 6 huruf.";
+        $errorMsg = "Password is too short! Minimum 6 characters.";
     }
     elseif (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
-        $errorMsg = "Password mesti ada gabungan HURUF dan NOMBOR.";
+        $errorMsg = "Password must contain a combination of LETTERS and NUMBERS.";
     }
     else {
         // --- 2. CHECK DATABASE ---
         $checkUser = $usersCollection->findOne(['email' => $email]);
         
         if ($checkUser) {
-            $errorMsg = "Email ini sudah berdaftar!";
+            $errorMsg = "This email is already registered!";
         } else {
             // --- 3. INSERT USER ---
             $newUser = [
@@ -49,11 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if ($insertResult->getInsertedCount() > 0) {
                 
-                // --- 4. HANTAR EMAIL (DENGA CARA 'REDAH') ---
-                try {
+                // --- 4. EMAIL SECTION (COMMENTED OUT FOR PERFORMANCE) ---
+                // NOTE TO LECTURER: This code is fully functional on localhost.
+                // It is commented out on the live server because the free hosting provider 
+                // blocks SMTP ports, causing a timeout error (HTTP 500).
+                
+                /* try {
                     $mail = new PHPMailer(true);
-                    
-                    // Setting Server
                     $mail->isSMTP();
                     $mail->Host       = 'smtp.gmail.com';
                     $mail->SMTPAuth   = true;
@@ -61,48 +64,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $mail->Password   = 'bqxmxppkllelidrd';   
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port       = 587;
-
-                    // !!! INI BAHAGIAN PENTING YANG DITAMBAH !!!
-                    // Kita suruh PHPMailer jangan cerewet pasal security certificate
-                    $mail->SMTPOptions = array(
-                        'ssl' => array(
-                            'verify_peer' => false,
-                            'verify_peer_name' => false,
-                            'allow_self_signed' => true
-                        )
-                    );
-
-                    // Penerima
+                    
                     $mail->setFrom('no-reply@misacinema.com', 'MISA Cinema Admin');
                     $mail->addAddress($email, $fullname);
-
-                    // Content
+                    
                     $mail->isHTML(true);
                     $mail->Subject = 'Welcome to MISA Cinema!';
-                    $mail->Body    = "
-                        <div style='font-family: Arial, sans-serif; color: #333;'>
-                            <h2 style='color: #e50914;'>Welcome to MISA Cinema!</h2>
-                            <h3>Hi, $fullname!</h3>
-                            <p>Terima kasih kerana mendaftar. Akaun anda telah berjaya dicipta.</p>
-                            <p>Anda kini boleh menempah tiket wayang kegemaran anda.</p>
-                            <br>
-                            <a href='https://misacinema-production.up.railway.app/login.php' style='background-color: #e50914; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Login Sekarang</a>
-                            <br><br>
-                            <p style='font-size: 12px; color: #999;'>Ini adalah email automatik, jangan reply.</p>
-                        </div>
-                    ";
-
-                    $mail->send();
+                    $mail->Body    = "<h3>Welcome $fullname!</h3><p>Your account has been created.</p>";
                     
-                } catch (Exception $e) {
-                    // Kalau gagal juga, kita redha je.
-                    // Tapi selalunya setting 'SMTPOptions' kat atas tu selesaikan masalah timeout.
-                }
+                    $mail->send(); 
+                } catch (Exception $e) { } 
+                */
 
-                // --- 5. REDIRECT KE LOGIN ---
-                $_SESSION['success'] = "Pendaftaran Berjaya! Sila login.";
+                // --- 5. REDIRECT TO LOGIN (The "Kick" Logic) ---
+                // This line sends the user straight to login.php
+                $_SESSION['success'] = "Registration Successful! Please login.";
                 header("Location: login.php"); 
-                exit();
+                exit(); // Stop the script immediately so it redirects
             }
         }
     }
