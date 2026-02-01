@@ -127,7 +127,7 @@ $senaraiMovie = $collection->find([]);
 
     <section class="hero-carousel">
         <div class="carousel-item active">
-            <video class="video-bg" loop playsinline muted preload="auto">
+            <video class="video-bg" autoplay loop playsinline muted preload="auto">
                 <source src="assets/videos/Papa Zola .mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
@@ -139,7 +139,7 @@ $senaraiMovie = $collection->find([]);
         </div>
 
         <div class="carousel-item">
-            <video class="video-bg" loop playsinline muted preload="auto">
+            <video class="video-bg" autoplay loop playsinline muted preload="auto">
                 <source src="assets/videos/Avatar .mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
@@ -151,7 +151,7 @@ $senaraiMovie = $collection->find([]);
         </div>
 
         <div class="carousel-item">
-            <video class="video-bg" loop playsinline muted preload="auto">
+            <video class="video-bg" autoplay loop playsinline muted preload="auto">
                 <source src="assets/videos/The SpongeBob.mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
