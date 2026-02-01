@@ -58,6 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newFilename = "profile_" . (string)$userId . "." . $filetype;
             $destination = "uploads/" . $newFilename;
 
+            // Ensure directory exists
+            if (!is_dir('uploads')) { mkdir('uploads', 0777, true); }
+
             if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $destination)) {
                 $updateData['profile_pic'] = $newFilename;
             } else {
@@ -92,8 +95,12 @@ $pic = isset($user['profile_pic']) ? "uploads/".$user['profile_pic'] : "https://
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>My Profile - Misa Cinema</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         /* UNIVERSAL BACKGROUND */
         body { 
@@ -108,50 +115,139 @@ $pic = isset($user['profile_pic']) ? "uploads/".$user['profile_pic'] : "https://
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
+            padding: 15px; /* Added padding so card doesn't touch edges on mobile */
+            box-sizing: border-box;
         }
 
         .profile-card { 
-            background: rgba(21, 21, 21, 0.95); /* Sedikit transparent */
+            background: #1a1a1a;
             width: 100%; 
-            max-width: 450px; 
+            max-width: 500px; 
             padding: 40px; 
-            border-radius: 10px; 
+            border-radius: 12px; 
             border: 1px solid #333; 
             text-align: center; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .profile-img-container { position: relative; width: 120px; height: 120px; margin: 0 auto 20px; }
-        .profile-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #e50914; }
-        .upload-btn-wrapper { position: absolute; bottom: 0; right: 0; background: #e50914; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
-        .upload-btn-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
+        /* --- PROFILE IMAGE --- */
+        .profile-img-container { 
+            position: relative; 
+            width: 130px; 
+            height: 130px; 
+            margin: 0 auto 25px; 
+        }
+        .profile-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 50%; 
+            border: 4px solid #e50914; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .upload-btn-wrapper { 
+            position: absolute; 
+            bottom: 5px; 
+            right: 5px; 
+            background: #e50914; 
+            color: white; 
+            border-radius: 50%; 
+            width: 36px; 
+            height: 36px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            overflow: hidden; 
+            border: 2px solid #1a1a1a;
+            transition: 0.2s;
+        }
+        .upload-btn-wrapper:hover { transform: scale(1.1); }
+        .upload-btn-wrapper input[type=file] { 
+            position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; 
+        }
         
-        h2 { margin: 10px 0 5px; text-transform: uppercase; color: #fff; letter-spacing: 1px; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; color: #aaa; font-size: 0.8em; margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        input:focus { outline: none; border-color: #e50914; }
+        h2 { margin: 10px 0 20px; text-transform: uppercase; color: #fff; letter-spacing: 1px; font-size: 1.5rem; }
         
-        .btn-save { width: 100%; background: #e50914; color: white; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        /* --- FORM --- */
+        .form-group { margin-bottom: 18px; text-align: left; }
+        
+        label { display: block; color: #bbb; font-size: 0.9em; margin-bottom: 8px; font-weight: 500; }
+        
+        input { 
+            width: 100%; 
+            padding: 14px; /* Larger touch area */
+            background: #222; 
+            border: 1px solid #444; 
+            color: white; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS auto-zoom */
+            transition: 0.2s;
+        }
+        input:focus { outline: none; border-color: #e50914; background: #2a2a2a; }
+        
+        .btn-save { 
+            width: 100%; 
+            background: #e50914; 
+            color: white; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 1rem;
+            cursor: pointer; 
+            margin-top: 15px; 
+            transition: 0.3s; 
+            text-transform: uppercase;
+        }
         .btn-save:hover { background: #ff0f1f; }
         
-        .links { margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em; }
-        .links a { color: #aaa; text-decoration: none; }
+        /* --- LINKS --- */
+        .links { 
+            margin-top: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.95em; 
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .links a { color: #888; text-decoration: none; transition: 0.2s; }
         .links a:hover { color: white; }
-        .msg { background: #2ecc71; color: #fff; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+        
+        .msg { 
+            background: rgba(46, 204, 113, 0.2); 
+            border: 1px solid #2ecc71;
+            color: #2ecc71; 
+            padding: 12px; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            font-size: 0.9rem;
+        }
+
+        /* --- MOBILE TWEAKS --- */
+        @media (max-width: 480px) {
+            .profile-card { padding: 30px 20px; }
+            .profile-img-container { width: 110px; height: 110px; }
+            h2 { font-size: 1.3rem; }
+        }
     </style>
 </head>
 <body>
 
     <div class="profile-card">
         <?php if($message): ?>
-            <div class="msg"><?php echo $message; ?></div>
+            <div class="msg"><i class="fas fa-check-circle"></i> <?php echo $message; ?></div>
         <?php endif; ?>
 
         <form action="profile.php" method="POST" enctype="multipart/form-data">
             <div class="profile-img-container">
                 <img src="<?php echo $pic; ?>" alt="Profile" class="profile-img">
-                <div class="upload-btn-wrapper">📷<input type="file" name="profile_pic" onchange="this.form.submit()"></div>
+                <div class="upload-btn-wrapper">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" name="profile_pic" onchange="this.form.submit()">
+                </div>
             </div>
 
             <h2><?php echo $fullname; ?></h2>
@@ -180,12 +276,10 @@ $pic = isset($user['profile_pic']) ? "uploads/".$user['profile_pic'] : "https://
         </form>
 
         <div class="links">
-            <a href="home.php">← Back to Home</a>
-            <a href="logout.php" style="color: #e50914;">Logout</a>
+            <a href="home.php"><i class="fas fa-arrow-left"></i> Home</a>
+            <a href="logout.php" style="color: #e50914;"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
 </body>
-
 </html>
-

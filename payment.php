@@ -34,9 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_seats'])) {
     $finalSeats = explode(",", $_POST['final_seats']); 
     
     $insertResult = $bookingCollection->insertOne([
-        // --- FIX: Ambil specific field sahaja, bukan semua object ---
         'customer_name' => $_SESSION['user']['fullname'], 
-        // -----------------------------------------------------------
         'movie_name' => $_POST['final_movie'],
         'hall_name' => $_POST['final_hall'],
         'showtime' => $_POST['final_showtime'],
@@ -69,37 +67,146 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_seats'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Secure Payment</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background-color: #000; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #fff; }
-        .payment-modal { background-color: #1a1a1a; width: 700px; border-radius: 8px; overflow: hidden; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .header { background-color: #e50914; padding: 20px; text-align: center; }
+        /* --- GLOBAL LAYOUT --- */
+        body { 
+            background-color: #000; 
+            font-family: 'Roboto', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            color: #fff; 
+            padding: 20px; /* Padding for mobile edges */
+            box-sizing: border-box;
+        }
+
+        .payment-modal { 
+            background-color: #1a1a1a; 
+            width: 100%; 
+            max-width: 600px; /* Limit width on desktop */
+            border-radius: 12px; 
+            overflow: hidden; 
+            border: 1px solid #333; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+        }
+
+        .header { 
+            background-color: #e50914; 
+            padding: 20px; 
+            text-align: center; 
+        }
         .header h2 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+
         .content { padding: 30px; }
-        .summary-box { background-color: #252525; padding: 20px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-left: 5px solid #e50914; }
-        .price-amount { font-size: 1.8rem; color: #00ff7f; font-weight: bold; }
+
+        /* --- SUMMARY BOX --- */
+        .summary-box { 
+            background-color: #252525; 
+            padding: 20px; 
+            border-radius: 6px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            border-left: 5px solid #e50914; 
+        }
         
-        /* Method Tabs */
-        .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .method-card { background: #252525; padding: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; border-radius: 8px; transition: 0.3s; color: #aaa; }
+        .price-amount { font-size: 1.8rem; color: #00ff7f; font-weight: bold; white-space: nowrap; }
+
+        /* --- PAYMENT METHODS --- */
+        .method-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2 Columns by default */
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+
+        .method-card { 
+            background: #252525; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            border: 2px solid transparent; 
+            border-radius: 8px; 
+            transition: 0.3s; 
+            color: #aaa; 
+        }
+        
         .method-card:hover { background: #333; color: white; }
         .method-card.active { background: #222; border-color: #e50914; color: white; }
         .method-card i { font-size: 2rem; margin-bottom: 10px; display: block; }
         
-        /* Forms */
-        .form-section { background: #222; padding: 20px; margin-bottom: 20px; border: 1px solid #333; border-radius: 5px; display: none; }
+        /* --- FORMS --- */
+        .form-section { 
+            background: #222; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid #333; 
+            border-radius: 5px; 
+            display: none; 
+        }
         .form-section.show { display: block; animation: fadeIn 0.3s ease-in-out; }
         
-        label { display: block; margin-bottom: 8px; font-size: 0.85em; color: #ccc; }
-        input, select { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        label { display: block; margin-bottom: 8px; font-size: 0.9em; color: #ccc; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 14px; /* Larger touch target */
+            background: #111; 
+            border: 1px solid #444; 
+            color: white; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: 0.2s; 
+            font-size: 16px; /* Prevents auto-zoom on iPhone */
+        }
         input:focus, select:focus { border-color: #e50914; }
         
-        .btn-pay { width: 100%; padding: 15px; background: #e50914; color: white; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px; border-radius: 5px; transition: 0.3s; }
+        .btn-pay { 
+            width: 100%; 
+            padding: 16px; 
+            background: #e50914; 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            border-radius: 6px; 
+            transition: 0.3s; 
+            text-transform: uppercase;
+        }
         .btn-pay:hover { background: #ff0f1f; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- MOBILE RESPONSIVE TWEAKS --- */
+        @media (max-width: 500px) {
+            .content { padding: 20px; } /* Less padding inside */
+            
+            /* Stack the summary box vertically on small screens */
+            .summary-box { 
+                flex-direction: column; 
+                text-align: center; 
+                gap: 10px;
+            }
+
+            /* Make payment method buttons stack vertically on very small screens */
+            .method-grid { grid-template-columns: 1fr; }
+            .method-card { display: flex; align-items: center; gap: 15px; padding: 15px; }
+            .method-card i { margin-bottom: 0; font-size: 1.5rem; }
+            
+            .price-amount { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -111,9 +218,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_seats'])) {
 
     <div class="content">
         <div class="summary-box">
-            <div>
-                <h3 style="margin: 0 0 5px 0; color:white;"><?php echo htmlspecialchars($movieName); ?></h3>
-                <small style="color:#aaa;"><?php echo htmlspecialchars($hallName); ?> | <?php echo date('d M, h:i A', strtotime($showtime)); ?></small><br>
+            <div style="width: 100%;">
+                <h3 style="margin: 0 0 5px 0; color:white; font-size: 1.1rem;"><?php echo htmlspecialchars($movieName); ?></h3>
+                <small style="color:#aaa; display:block; margin-bottom:5px;">
+                    <?php echo htmlspecialchars($hallName); ?> <br> 
+                    <?php echo date('d M, h:i A', strtotime($showtime)); ?>
+                </small>
                 <small style="color:#e50914; font-weight:bold;">Seats: <?php echo htmlspecialchars($seatsString); ?></small>
             </div>
             <div class="price-amount">RM <?php echo number_format($totalPrice, 2); ?></div>
@@ -132,24 +242,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_seats'])) {
 
             <div class="method-grid">
                 <div class="method-card active" onclick="selectMethod('Credit Card', this)">
-                    <i class="fab fa-cc-visa"></i> Credit / Debit Card
+                    <i class="fab fa-cc-visa"></i> 
+                    <span>Credit / Debit Card</span>
                 </div>
                 <div class="method-card" onclick="selectMethod('Online Banking', this)">
-                    <i class="fas fa-university"></i> FPX Online Banking
+                    <i class="fas fa-university"></i> 
+                    <span>FPX Banking</span>
                 </div>
             </div>
 
             <div id="card-inputs" class="form-section show">
                 <label>Card Number</label>
-                <input type="text" placeholder="0000 0000 0000 0000" maxlength="19">
+                <input type="tel" placeholder="0000 0000 0000 0000" maxlength="19">
                 <div style="display:flex; gap:10px; margin-top:15px;">
                     <div style="flex:1">
                         <label>Expiry</label>
-                        <input type="text" placeholder="MM/YY">
+                        <input type="tel" placeholder="MM/YY">
                     </div>
                     <div style="flex:1">
                         <label>CVC</label>
-                        <input type="password" placeholder="123" maxlength="3">
+                        <input type="tel" placeholder="123" maxlength="4">
                     </div>
                 </div>
             </div>

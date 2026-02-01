@@ -6,7 +6,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database Connection
-// Ensure your connection string is correct
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $usersCollection = $client->misacinema_db->users;
 
@@ -49,28 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $insertResult = $usersCollection->insertOne($newUser);
 
             if ($insertResult->getInsertedCount() > 0) {
-                
-                // --- 4. EMAIL SECTION (COMMENTED OUT FOR PERFORMANCE) ---
+                // --- 4. EMAIL SECTION (COMMENTED OUT) ---
                 /* try {
-                    $mail = new PHPMailer(true);
-                    $mail->isSMTP();
-                    $mail->Host       = 'smtp.gmail.com';
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = 'nrimam04@gmail.com'; 
-                    $mail->Password   = 'bqxmxppkllelidrd';   
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = 587;
-                    
-                    $mail->setFrom('no-reply@misacinema.com', 'MISA Cinema Admin');
-                    $mail->addAddress($email, $fullname);
-                    
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Welcome to MISA Cinema!';
-                    $mail->Body    = "<h3>Welcome $fullname!</h3><p>Your account has been created.</p>";
-                    
-                    $mail->send(); 
-                } catch (Exception $e) { } 
-                */
+                   // Mail logic here...
+                } catch (Exception $e) { } */
 
                 // --- 5. REDIRECT TO LOGIN ---
                 $_SESSION['success'] = "Registration Successful! Please login.";
@@ -86,6 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Register - Misa Cinema</title>
     <link rel="icon" type="image/jpeg" href="assets/img/logo_misa.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -105,19 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center; 
             min-height: 100vh; 
             margin: 0; 
+            padding: 20px; /* Added padding for mobile edges */
+            box-sizing: border-box;
         }
         .register-box { 
             background: rgba(20, 20, 20, 0.95);
             padding: 40px; 
             border-radius: 8px; 
-            width: 400px; 
+            width: 100%;       /* Fluid width */
+            max-width: 400px;  /* Max width for desktop */
             border: 1px solid #333; 
             box-shadow: 0px 0px 25px rgba(0,0,0,0.8);
+            box-sizing: border-box; /* Ensures padding doesn't break width */
         }
         .header { 
             background: #e50914; 
             margin: -40px -40px 30px -40px; 
-            padding: 20px; 
+            padding: 25px; 
             text-align: center; 
             border-radius: 8px 8px 0 0; 
         }
@@ -125,27 +112,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         input { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px; /* Larger touch area */
             background: #222; 
             border: 1px solid #444; 
             color: white; 
             margin-bottom: 15px; 
             border-radius: 4px; 
             box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS auto-zoom */
         }
-        input:focus { outline: none; border-color: #e50914; }
+        input:focus { outline: none; border-color: #e50914; background: #2a2a2a; }
         
-        label { font-size: 0.8em; color: #aaa; display: block; margin-bottom: 5px; font-weight: bold; }
+        label { font-size: 0.85em; color: #aaa; display: block; margin-bottom: 8px; font-weight: bold; }
         
-        /* --- NEW STYLES FOR PASSWORD EYE --- */
+        /* --- PASSWORD EYE --- */
         .password-container {
             position: relative;
             width: 100%;
-            margin-bottom: 5px; /* Reduced margin because of hint below */
+            margin-bottom: 5px; 
         }
         .password-container input {
             margin-bottom: 0;
-            padding-right: 40px; /* Space for the icon */
+            padding-right: 45px; /* Space for the icon */
         }
         .toggle-password {
             position: absolute;
@@ -154,24 +142,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transform: translateY(-50%);
             color: #aaa;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1.1em;
             z-index: 10;
+            padding: 5px; /* Easier to tap */
         }
         .toggle-password:hover { color: white; }
 
         .btn { 
-            width: 100%; padding: 15px; background: #e50914; color: white; border: none; 
-            font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background 0.3s;
+            width: 100%; padding: 16px; background: #e50914; color: white; border: none; 
+            font-weight: bold; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px; transition: background 0.3s;
         }
         .btn:hover { background: #ff0f1f; }
-        .link { text-align: center; margin-top: 20px; font-size: 0.9em; color: #aaa; }
+        
+        .link { text-align: center; margin-top: 25px; font-size: 0.95em; color: #aaa; }
         .link a { color: #e50914; text-decoration: none; font-weight: bold; }
         
-        .hint { font-size: 0.7em; color: #666; margin-top: 5px; margin-bottom: 15px; display: block;}
+        .hint { font-size: 0.75em; color: #888; margin-top: 8px; margin-bottom: 15px; display: block;}
         
         .alert-error {
-            background-color: #f8d7da; color: #721c24; padding: 10px; 
-            margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.9em;
+            background-color: rgba(220, 53, 69, 0.2); 
+            border: 1px solid #dc3545;
+            color: #ff6b6b; 
+            padding: 12px; 
+            margin-bottom: 25px; 
+            border-radius: 4px; 
+            text-align: center; 
+            font-size: 0.9em;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
+            .register-box { padding: 30px 20px; }
+            .header { margin: -30px -20px 25px -20px; }
         }
     </style>
 </head>
@@ -183,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <?php if($errorMsg): ?>
-            <div class="alert-error"><?php echo $errorMsg; ?></div>
+            <div class="alert-error"><i class="fas fa-exclamation-circle"></i> <?php echo $errorMsg; ?></div>
         <?php endif; ?>
 
         <form method="POST">

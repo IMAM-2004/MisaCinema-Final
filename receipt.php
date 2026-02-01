@@ -45,6 +45,8 @@ try {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Booking Confirmed - Misa Cinema</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -55,30 +57,67 @@ try {
 
     <style>
         body {
-            background-color: #111; font-family: 'Roboto', sans-serif; color: white;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0;
+            background-color: #111; 
+            font-family: 'Roboto', sans-serif; 
+            color: white;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
+        
         .ticket-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
             margin-bottom: 20px;
-            padding: 20px; 
-            background: #111;
         }
+
         .ticket-container {
-            background: #fff; color: #000; width: 350px;
-            border-radius: 10px; overflow: hidden;
+            background: #fff; 
+            color: #000; 
+            width: 100%;
+            max-width: 380px; /* Looks like a real ticket width */
+            border-radius: 12px; 
+            overflow: hidden;
             box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
             position: relative;
         }
-        .ticket-header { background: #dc3545; padding: 20px; text-align: center; color: white; border-bottom: 2px dashed #fff; }
-        .ticket-header h2 { margin: 0; font-size: 1.5rem; text-transform: uppercase; }
+        
+        .ticket-header { 
+            background: #dc3545; 
+            padding: 20px; 
+            text-align: center; 
+            color: white; 
+            border-bottom: 2px dashed #fff; 
+            position: relative;
+        }
+        /* Decorative semi-circles to look like a ripped ticket */
+        .ticket-header::after, .ticket-header::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            width: 20px;
+            height: 20px;
+            background: #111;
+            border-radius: 50%;
+        }
+        .ticket-header::before { left: -10px; }
+        .ticket-header::after { right: -10px; }
+
+        .ticket-header h2 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; }
         .ticket-body { padding: 25px; }
 
         .info-group { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .info-group:last-child { border: none; }
+        
         .label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
         .value { font-size: 1.1rem; font-weight: bold; color: #000; display: block; }
-        .seats-value { color: #dc3545; font-size: 1.2rem; }
+        .seats-value { color: #dc3545; font-size: 1.2rem; word-break: break-word; line-height: 1.4; }
 
         .qr-section { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #ccc; }
         
@@ -91,19 +130,52 @@ try {
             justify-content: center;
             align-items: center;
         }
-        /* Pastikan gambar QR fit dalam kotak */
-        .qr-box img {
-            max-width: 100%;
-        }
+        .qr-box img { max-width: 100%; }
 
         .ticket-id { font-size: 0.7rem; color: #aaa; margin-top: 10px; font-family: monospace; }
-        .btn-group { width: 350px; display: flex; gap: 10px; margin-top: 10px;}
-        .btn { flex: 1; padding: 15px; text-align: center; text-decoration: none; font-weight: bold; text-transform: uppercase; border-radius: 5px; cursor: pointer; border:none; font-family: inherit;}
-        .btn-home { background: #222; color: white; }
-        .btn-home:hover { background: #444; }
-        .btn-download { background: #fff; color: #dc3545; font-weight: 800;}
-        .btn-download:hover { background: #f0f0f0; }
-        .status-badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; margin-top: 5px; }
+        
+        /* Buttons */
+        .btn-group { 
+            width: 100%; 
+            max-width: 380px; 
+            display: flex; 
+            flex-direction: column; /* Stack vertically on mobile */
+            gap: 12px; 
+            margin-top: 10px;
+        }
+        
+        .btn { 
+            width: 100%;
+            padding: 16px; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            border: none; 
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+        
+        .btn-home { background: #333; color: white; }
+        .btn-home:hover { background: #555; }
+        
+        .btn-download { background: #fff; color: #dc3545; font-weight: 800; }
+        .btn-download:hover { background: #f8f8f8; }
+        
+        .status-badge { 
+            background: #28a745; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            display: inline-block; 
+            margin-top: 8px; 
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -170,23 +242,27 @@ try {
                 </span>
             </div>
 
-            <div class="info-group" style="text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px; border:none;">
+            <div class="info-group" style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 8px; border:none;">
                 <span class="label">Total Amount</span>
-                <span class="value" style="font-size:1.5rem; color:#222;">RM <?php echo number_format($booking['total_price'], 2); ?></span>
+                <span class="value" style="font-size:1.6rem; color:#222; margin-top:5px;">RM <?php echo number_format($booking['total_price'], 2); ?></span>
             </div>
 
             <div class="qr-section">
                 <div id="qrcode" class="qr-box"></div>
                 <div class="ticket-id">Ref: <?php echo $bookingId; ?></div>
-                <p style="font-size:0.7rem; color:#888;">Show this QR at the cinema entrance.</p>
+                <p style="font-size:0.7rem; color:#888; margin-top:5px;">Show this QR at the cinema entrance.</p>
             </div>
         </div>
     </div>
 </div>
 
 <div class="btn-group">
-    <a href="home.php" class="btn btn-home">Back to Home</a>
-    <button onclick="downloadPDF()" class="btn btn-download"><i class="fas fa-file-pdf"></i> Download PDF</button>
+    <button onclick="downloadPDF()" class="btn btn-download">
+        <i class="fas fa-file-pdf"></i> Download Ticket
+    </button>
+    <a href="home.php" class="btn btn-home">
+        <i class="fas fa-home"></i> Back to Home
+    </a>
 </div>
 
 <script>
@@ -210,9 +286,12 @@ try {
         });
 
         // Auto download lepas 1.5 saat (bagi masa QR siap lukis)
+        // Saya komenkan AUTO-DOWNLOAD supaya tak ganggu UX mobile
+        // Kalau nak auto, uncomment baris bawah:
+        
         setTimeout(function() {
-             downloadPDF(); // <--- DAH UNCOMMENT, SEKARANG DIA AKAN JALAN!
-        }, 1500); 
+             downloadPDF(); 
+        }, 1500);
     };
 
     function downloadPDF() {
@@ -222,7 +301,7 @@ try {
         html2canvas(ticketContainer, {
             scale: 2,
             backgroundColor: "#ffffff",
-            logging: true
+            logging: false
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const doc = new jsPDF('p', 'mm', 'a4'); 

@@ -2,17 +2,18 @@
 session_start();
 require 'vendor/autoload.php';
 
+// 1. CONNECT TO DATABASE
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $usersCollection = $client->misacinema_db->users;
 
-$step = 1; // Step 1: Verify, Step 2: Reset
+$step = 1; // Step 1: Verify Identity, Step 2: Reset Password, Step 3: Success
 $error = '';
 $success = '';
 
-// --- LOGIC ---
+// --- BACKEND LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
-    // ACTION 1: VERIFY USER (Check Email & Phone)
+    // ACTION 1: VERIFY USER (Check if Email & Phone match)
     if (isset($_POST['verify_user'])) {
         $email = $_POST['email'];
         $phone = $_POST['phone'];
@@ -20,11 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $usersCollection->findOne(['email' => $email, 'phone' => $phone]);
 
         if ($user) {
-            // User found! Move to Step 2
+            // User found! Save email to session and move to Step 2
             $_SESSION['reset_email'] = $email; 
             $step = 2;
         } else {
-            $error = "No account found with that Email and Phone number.";
+            $error = "No account found with these details. Please check again.";
         }
     }
 
@@ -32,12 +33,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['reset_password'])) {
         $new_pass = $_POST['new_password'];
         $confirm_pass = $_POST['confirm_password'];
+        
+        // Security Check: Ensure session still exists
+        if (!isset($_SESSION['reset_email'])) {
+            header("Location: forgot_password.php"); 
+            exit();
+        }
         $email = $_SESSION['reset_email'];
 
         if ($new_pass === $confirm_pass) {
             if (strlen($new_pass) >= 6) {
                 
-                // Hash Password
+                // Hash the new password for security
                 $hashed_password = password_hash($new_pass, PASSWORD_DEFAULT);
 
                 // Update MongoDB
@@ -46,16 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     ['$set' => ['password' => $hashed_password]] 
                 );
                 
-                $success = "Password updated successfully! <a href='login.php'>Login Now</a>";
-                unset($_SESSION['reset_email']);
+                $success = "Password updated successfully! <br> <a href='login.php' class='login-link'>Login Now</a>";
+                unset($_SESSION['reset_email']); // Clear session for security
                 $step = 3; 
             } else {
-                $error = "Password must be at least 6 characters.";
-                $step = 2; 
+                $error = "Password must be at least 6 characters long.";
+                $step = 2; // Stay on Step 2
             }
         } else {
             $error = "Passwords do not match!";
-            $step = 2; 
+            $step = 2; // Stay on Step 2
         }
     }
 }
@@ -65,84 +72,134 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Forgot Password - Misa Cinema</title>
-    <link rel="icon" type="image/jpeg" href="assets/img/logo_misa.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
         body { 
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('assets/images/bg_cinema.png');
-            background-size: cover; background-position: center;
-            color: white; font-family: 'Roboto', sans-serif;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
+            background-color: #0b0b0b; /* Fallback color */
+            /* You can add your background image back here if you have it */
+            /* background-image: url('assets/img/bg_cinema.jpg'); */ 
+            background-size: cover; 
+            background-position: center;
+            color: white; 
+            font-family: 'Roboto', sans-serif;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+            padding: 20px; /* Padding for mobile edges */
+            box-sizing: border-box;
         }
-        .box { 
-            background: rgba(20, 20, 20, 0.95); padding: 40px; border-radius: 8px; width: 350px; 
-            border: 1px solid #333; text-align: center;
-        }
-        h2 { color: #e50914; margin-bottom: 20px; }
-        
-        input { 
-            width: 100%; padding: 12px; background: #333; border: 1px solid #444; 
-            color: white; margin-bottom: 15px; border-radius: 4px; box-sizing: border-box; 
-        }
-        input:focus { outline: none; border-color: #e50914; }
 
-        /* --- PASSWORD CONTAINER & EYE ICON --- */
-        .password-container {
-            position: relative;
-            width: 100%;
-            margin-bottom: 15px;
+        .box { 
+            background: #181818; 
+            padding: 40px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            border-top: 3px solid #e50914;
         }
-        .password-container input {
-            margin-bottom: 0;
-            padding-right: 40px; /* Space for the icon */
+
+        h2 { color: #e50914; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        p.subtitle { color: #aaa; font-size: 0.9em; margin-bottom: 25px; line-height: 1.5; }
+        
+        /* Input Styling */
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            background: #222; 
+            border: 1px solid #333; 
+            color: white; 
+            margin-bottom: 15px; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 1em;
         }
+        input:focus { outline: none; border-color: #e50914; background: #2a2a2a; }
+
+        /* Password Eye Container */
+        .password-container { position: relative; width: 100%; margin-bottom: 15px; }
+        .password-container input { margin-bottom: 0; padding-right: 45px; } /* Room for icon */
+        
         .toggle-password {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #aaa;
+            color: #777;
             cursor: pointer;
-            font-size: 1em;
-            z-index: 10;
+            font-size: 1.1em;
+            padding: 5px; /* Increase touch area */
         }
-        .toggle-password:hover { color: white; }
+        .toggle-password:hover { color: #e50914; }
 
+        /* Buttons */
         .btn { 
-            width: 100%; padding: 12px; background: #e50914; color: white; border: none; 
-            font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px;
+            width: 100%; 
+            padding: 15px; 
+            background: #e50914; 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-top: 10px;
+            font-size: 1em;
+            text-transform: uppercase;
+            transition: 0.3s;
         }
         .btn:hover { background: #ff0f1f; }
-        .error { color: #ff4444; font-size: 0.9em; margin-bottom: 15px; }
-        .success { color: #00C851; font-size: 1.1em; margin-bottom: 15px; }
-        .back-link { display: block; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 0.8em;}
+
+        /* Messages */
+        .error { 
+            background: rgba(255, 68, 68, 0.1); 
+            color: #ff4444; 
+            padding: 10px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            margin-bottom: 15px; 
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+        .success { 
+            color: #00ff7f; 
+            font-size: 1.1em; 
+            margin-bottom: 20px; 
+            line-height: 1.6;
+        }
+        .login-link { color: #e50914; text-decoration: underline; }
+
+        .back-link { display: block; margin-top: 20px; color: #777; text-decoration: none; font-size: 0.9em;}
         .back-link:hover { color: white; }
-        .success a { color: #e50914; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div class="box">
+        
         <?php if ($step == 1): ?>
-            <h2>RECOVER ACCOUNT</h2>
-            <p style="color:#ccc; font-size:0.9em; margin-bottom:20px;">Enter your Email and Phone Number to verify identity.</p>
+            <h2>Recovery</h2>
+            <p class="subtitle">Enter your registered Email and Phone Number to verify your identity.</p>
             
-            <?php if($error) echo "<div class='error'>$error</div>"; ?>
+            <?php if($error) echo "<div class='error'><i class='fas fa-exclamation-circle'></i> $error</div>"; ?>
 
             <form method="POST">
                 <input type="email" name="email" placeholder="Email Address" required>
-                <input type="text" name="phone" placeholder="Phone Number" required>
-                <button type="submit" name="verify_user" class="btn">VERIFY ACCOUNT</button>
+                <input type="tel" name="phone" placeholder="Phone Number" required>
+                <button type="submit" name="verify_user" class="btn">Verify Account</button>
             </form>
 
         <?php elseif ($step == 2): ?>
-            <h2>RESET PASSWORD</h2>
-            <p style="color:#ccc; font-size:0.9em; margin-bottom:20px;">Identity Verified. Create a new password.</p>
+            <h2>Reset Password</h2>
+            <p class="subtitle">Identity verified. Please create a new password.</p>
 
-            <?php if($error) echo "<div class='error'>$error</div>"; ?>
+            <?php if($error) echo "<div class='error'><i class='fas fa-exclamation-circle'></i> $error</div>"; ?>
 
             <form method="POST">
                 <div class="password-container">
@@ -155,15 +212,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <i class="fas fa-eye toggle-password" onclick="togglePass('confirmPass', this)"></i>
                 </div>
 
-                <button type="submit" name="reset_password" class="btn">UPDATE PASSWORD</button>
+                <button type="submit" name="reset_password" class="btn">Update Password</button>
             </form>
 
         <?php elseif ($step == 3): ?>
-            <h2>SUCCESS!</h2>
+            <h2 style="color:#00ff7f;">Success!</h2>
             <div class="success"><?php echo $success; ?></div>
+            <i class="fas fa-check-circle" style="font-size: 3em; color: #00ff7f; margin-bottom: 20px;"></i>
         <?php endif; ?>
 
-        <a href="login.php" class="back-link">Back to Login</a>
+        <?php if($step != 3): ?>
+            <a href="login.php" class="back-link">Back to Login</a>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -171,11 +231,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const input = document.getElementById(inputId);
             
             if (input.type === 'password') {
-                input.type = 'text'; // Show
+                input.type = 'text'; // Show Password
                 iconElement.classList.remove('fa-eye');
                 iconElement.classList.add('fa-eye-slash');
             } else {
-                input.type = 'password'; // Hide
+                input.type = 'password'; // Hide Password
                 iconElement.classList.remove('fa-eye-slash');
                 iconElement.classList.add('fa-eye');
             }
