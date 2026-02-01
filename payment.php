@@ -310,6 +310,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_seats'])) {
         }
     }
 </script>
-
+<?php include 'footer.php'; ?>
 </body>
 </html>
