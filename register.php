@@ -50,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($insertResult->getInsertedCount() > 0) {
                 
                 // --- 4. HANTAR EMAIL (TRY & CATCH) ---
-                // Kita guna Try/Catch supaya kalau email error, website TAK CRASH
                 try {
                     $mail = new PHPMailer(true);
                     $mail->isSMTP();
@@ -58,8 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $mail->SMTPAuth   = true;
                     $mail->Username   = 'nrimam04@gmail.com'; 
                     $mail->Password   = 'bqxmxppkllelidrd';   
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = 587;
+                    
+                    // --- SETTING BARU (OPTION B) ---
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Guna SMTPS
+                    $mail->Port       = 465; // Guna Port 465
 
                     $mail->setFrom('no-reply@misacinema.com', 'MISA Cinema Admin');
                     $mail->addAddress($email, $fullname);
@@ -74,17 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <a href='http://localhost/misa/login.php'>Login Sekarang</a>
                     ";
 
-                    //$mail->send();
+                    // KITA AKTIFKAN BALIK EMAIL
+                    $mail->send();
                     
                 } catch (Exception $e) {
-                    // Kalau email gagal, KITA DIAMKAN SAHAJA.
-                    // Jangan letak 'die()'. Biar coding jalan terus ke bawah.
+                    // Kalau email gagal/slow, biar je dia continue ke Login
                 }
 
-                // --- 5. REDIRECT KE LOGIN (WAJIB JALAN) ---
+                // --- 5. REDIRECT KE LOGIN ---
                 $_SESSION['success'] = "Pendaftaran Berjaya! Sila login.";
                 header("Location: login.php"); 
-                exit(); // Pastikan exit lepas header
+                exit(); 
             }
         }
     }
