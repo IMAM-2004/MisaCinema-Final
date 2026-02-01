@@ -2,7 +2,6 @@
 session_start();
 require 'vendor/autoload.php';
 
-// MongoDB Setup
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $collection = $client->misacinema_db->shows; 
 $senaraiMovie = $collection->find([]);
@@ -108,8 +107,8 @@ $senaraiMovie = $collection->find([]);
     </nav>
 
     <section class="hero-carousel">
-        <div class="carousel-item active" data-index="0">
-            <video class="video-bg" autoplay muted loop playsinline>
+        <div class="carousel-item active">
+            <video class="video-bg" muted loop playsinline>
                 <source src="assets/videos/Papa Zola .mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
@@ -121,8 +120,8 @@ $senaraiMovie = $collection->find([]);
             </div>
         </div>
 
-        <div class="carousel-item" data-index="1">
-            <video class="video-bg" autoplay muted loop playsinline>
+        <div class="carousel-item">
+            <video class="video-bg" muted loop playsinline>
                 <source src="assets/videos/Avatar .mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
@@ -134,8 +133,8 @@ $senaraiMovie = $collection->find([]);
             </div>
         </div>
 
-        <div class="carousel-item" data-index="2">
-            <video class="video-bg" autoplay muted loop playsinline>
+        <div class="carousel-item">
+            <video class="video-bg" muted loop playsinline>
                 <source src="assets/videos/The SpongeBob.mp4" type="video/mp4">
             </video>
             <div class="carousel-overlay"></div>
@@ -156,37 +155,33 @@ $senaraiMovie = $collection->find([]);
         </button>
     </section>
 
-    <div class="container" id="now-showing">
-        <h2 class="section-title">Now Showing</h2>
-        <div class="movie-grid">
-            <?php foreach($senaraiMovie as $movie): ?>
-                <div class="movie-card">
-                    <div class="poster-wrapper">
-                        <img src="assets/img/<?php echo $movie['image'] ?? 'default.jpg'; ?>">
-                    </div>
-                    <div class="card-info">
-                        <h3 style="margin:0;"><?php echo $movie['name']; ?></h3>
-                        <a href="booking.php?id=<?php echo $movie['_id']; ?>" class="btn-ticket" style="display:inline-block; margin-top:15px; font-size:0.8rem;">Buy Ticket</a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
     <script>
         let currentSlide = 0;
         let isPaused = false;
+        let isMuted = true; // Global sound state
         const slides = document.querySelectorAll('.carousel-item');
         const videos = document.querySelectorAll('.video-bg');
 
+        // Initial Play
+        videos[0].play();
+
         function showSlide(index) {
-            slides.forEach(slide => slide.classList.remove('active'));
-            slides[index].classList.add('active');
+            // Pause current video
+            videos[currentSlide].pause();
+            videos[currentSlide].currentTime = 0;
+            slides[currentSlide].classList.remove('active');
+
+            // Set new slide
             currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            // Sync sound state and play new video
+            videos[currentSlide].muted = isMuted;
+            videos[currentSlide].play();
         }
 
         function manualChange(direction) {
-            isPaused = true; // Stop auto-sliding when user clicks
+            isPaused = true;
             let nextSlide = (currentSlide + direction + slides.length) % slides.length;
             showSlide(nextSlide);
             
@@ -194,28 +189,30 @@ $senaraiMovie = $collection->find([]);
             setTimeout(() => { isPaused = false; }, 15000);
         }
 
-        // Auto-slide every 10 seconds
+        // Auto-slide slowed to 12 seconds
         setInterval(() => {
             if (!isPaused) {
                 let nextSlide = (currentSlide + 1) % slides.length;
                 showSlide(nextSlide);
             }
-        }, 10000);
+        }, 12000);
 
         function toggleTheaterSound() {
             const icon = document.getElementById('vol-icon');
             const text = document.getElementById('vol-text');
             
-            videos.forEach(v => {
-                v.muted = !v.muted;
-            });
+            isMuted = !isMuted;
+            
+            // Apply to current active video
+            videos[currentSlide].muted = isMuted;
 
-            if (videos[0].muted) {
+            if (isMuted) {
                 icon.className = "fas fa-volume-mute";
                 text.innerText = "UNMUTE THEATER";
             } else {
                 icon.className = "fas fa-volume-up";
                 text.innerText = "THEATER SOUND ON";
+                videos[currentSlide].play(); // Ensure it's playing
             }
         }
 
