@@ -48,7 +48,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Booking Confirmed - Misa Cinema</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -56,268 +56,250 @@ try {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
+        :root {
+            --primary: #e50914;
+            --dark-bg: #050505;
+            --ticket-bg: #151515;
+            --text-main: #fff;
+            --text-sub: #aaa;
+        }
+
         body {
-            background-color: #111; 
-            font-family: 'Roboto', sans-serif; 
+            background-color: var(--dark-bg); 
+            background-image: radial-gradient(circle at 50% 0%, #220505 0%, #000000 70%);
+            font-family: 'Montserrat', sans-serif; 
             color: white;
             display: flex; 
             flex-direction: column; 
-            justify-content: center; 
             align-items: center;
             min-height: 100vh; 
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             box-sizing: border-box;
         }
-        
+
+        /* --- TICKET CONTAINER --- */
         .ticket-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+            perspective: 1000px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 30px rgba(229, 9, 20, 0.15));
         }
 
-        .ticket-container {
-            background: #fff; 
-            color: #000; 
-            width: 100%;
-            max-width: 380px; /* Looks like a real ticket width */
-            border-radius: 12px; 
+        .ticket-visual {
+            background: var(--ticket-bg);
+            width: 340px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(229, 9, 20, 0.3);
             position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        
-        .ticket-header { 
-            background: #dc3545; 
-            padding: 20px; 
-            text-align: center; 
-            color: white; 
-            border-bottom: 2px dashed #fff; 
-            position: relative;
-        }
-        /* Decorative semi-circles to look like a ripped ticket */
-        .ticket-header::after, .ticket-header::before {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            width: 20px;
-            height: 20px;
-            background: #111;
+
+        /* The "Notch" / Koyak Effect using Pseudo-elements */
+        .ticket-visual::before, .ticket-visual::after {
+            content: ''; position: absolute; top: 68%; 
+            width: 24px; height: 24px; 
+            background-color: var(--dark-bg); /* Must match body bg */
             border-radius: 50%;
+            z-index: 10;
         }
-        .ticket-header::before { left: -10px; }
-        .ticket-header::after { right: -10px; }
+        .ticket-visual::before { left: -12px; }
+        .ticket-visual::after { right: -12px; }
 
-        .ticket-header h2 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; }
-        .ticket-body { padding: 25px; }
+        /* Dashed Line */
+        .dashed-line {
+            position: absolute; top: 68%; left: 10%; right: 10%;
+            height: 24px;
+            border-bottom: 2px dashed rgba(255,255,255,0.15);
+            pointer-events: none;
+        }
 
-        .info-group { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .info-group:last-child { border: none; }
-        
-        .label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
-        .value { font-size: 1.1rem; font-weight: bold; color: #000; display: block; }
-        .seats-value { color: #dc3545; font-size: 1.2rem; word-break: break-word; line-height: 1.4; }
+        /* --- HEADER SECTION --- */
+        .ticket-header {
+            background: linear-gradient(135deg, #e50914, #b2070f);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        .brand { font-weight: 900; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 5px; }
+        .status { font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 4px 12px; border-radius: 20px; display: inline-block; font-weight: 600; }
 
-        .qr-section { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #ccc; }
-        
-        /* Box QR Code */
-        .qr-box {
-            width: 120px; 
-            height: 120px; 
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .qr-box img { max-width: 100%; }
+        /* --- BODY SECTION --- */
+        .ticket-body { padding: 30px 25px 50px 25px; } /* Extra padding bottom for dashed line space */
 
-        .ticket-id { font-size: 0.7rem; color: #aaa; margin-top: 10px; font-family: monospace; }
+        .movie-title { 
+            font-size: 1.4rem; font-weight: 800; line-height: 1.2; 
+            margin-bottom: 5px; text-transform: uppercase; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .hall-name { color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; display: block; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .info-item label { display: block; font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+        .info-item span { font-size: 0.95rem; font-weight: 600; color: white; }
         
-        /* Buttons */
-        .btn-group { 
-            width: 100%; 
-            max-width: 380px; 
-            display: flex; 
-            flex-direction: column; /* Stack vertically on mobile */
-            gap: 12px; 
-            margin-top: 10px;
+        .seats-display {
+            background: rgba(255,255,255,0.05);
+            padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .seats-display label { font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; display: block; margin-bottom: 3px; }
+        .seats-display span { color: var(--primary); font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; }
+
+        /* --- FOOTER (QR) SECTION --- */
+        .ticket-footer {
+            background: #eee; /* Light bg for QR readability */
+            padding: 25px;
+            text-align: center;
+            color: #111;
+        }
+        .qr-wrapper {
+            background: white; padding: 10px; border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .ref-id { font-family: monospace; font-size: 0.7rem; color: #555; margin-top: 10px; letter-spacing: 1px; }
+        
+        /* --- BUTTONS --- */
+        .actions { 
+            display: flex; gap: 15px; width: 100%; max-width: 340px; 
+            flex-direction: column;
+            animation: fadeIn 1s ease;
         }
         
-        .btn { 
-            width: 100%;
-            padding: 16px; 
-            text-align: center; 
-            text-decoration: none; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            border: none; 
-            font-family: inherit;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: 0.2s;
+        .btn {
+            padding: 15px; border-radius: 50px; border: none; font-weight: 700;
+            cursor: pointer; font-size: 1rem; text-decoration: none; text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s; font-family: 'Montserrat', sans-serif;
         }
-        
-        .btn-home { background: #333; color: white; }
-        .btn-home:hover { background: #555; }
-        
-        .btn-download { background: #fff; color: #dc3545; font-weight: 800; }
-        .btn-download:hover { background: #f8f8f8; }
-        
-        .status-badge { 
-            background: #28a745; 
-            color: white; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            display: inline-block; 
-            margin-top: 8px; 
-            font-weight: 500;
+        .btn-download {
+            background: white; color: black;
         }
+        .btn-download:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(255,255,255,0.2); }
+        
+        .btn-home {
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-home:hover { background: rgba(255,255,255,0.2); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="ticket-wrapper" id="ticketToPrint">
-    <div class="ticket-container">
+<div class="ticket-wrapper">
+    <div class="ticket-visual" id="ticketToPrint">
         <div class="ticket-header">
-            <h2>Booking Confirmed</h2>
-            <div class="status-badge"><i class="fas fa-check-circle"></i> PAID SUCCESS</div>
+            <div class="brand"><i class="fas fa-film"></i> Misa Cinema</div>
+            <div class="status">PAYMENT SUCCESSFUL</div>
         </div>
 
         <div class="ticket-body">
-            
-            <div class="info-group">
-                <span class="label">Customer Name</span>
-                <span class="value" style="text-transform: capitalize;"><?php echo htmlspecialchars((string)$customerName); ?></span>
-            </div>
+            <div class="movie-title"><?php echo htmlspecialchars((string)($booking['movie_name'] ?? 'Movie')); ?></div>
+            <span class="hall-name"><?php echo htmlspecialchars((string)($booking['hall_name'] ?? 'Hall')); ?></span>
 
-            <div class="info-group">
-                <span class="label">Movie</span>
-                <span class="value">
-                    <?php 
-                        $mName = isset($booking['movie_name']) ? $booking['movie_name'] : '-';
-                        echo is_string($mName) ? htmlspecialchars($mName) : 'Movie'; 
-                    ?>
-                </span>
-            </div>
-
-            <div class="info-group" style="display:flex; justify-content:space-between;">
-                <div>
-                    <span class="label">Date</span>
-                    <span class="value"><?php echo date('d M Y', strtotime($booking['showtime'])); ?></span>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Date</label>
+                    <span><?php echo date('d M Y', strtotime($booking['showtime'])); ?></span>
                 </div>
-                <div style="text-align:right;">
-                    <span class="label">Time</span>
-                    <span class="value"><?php echo date('h:i A', strtotime($booking['showtime'])); ?></span>
+                <div class="info-item" style="text-align: right;">
+                    <label>Time</label>
+                    <span><?php echo date('h:i A', strtotime($booking['showtime'])); ?></span>
+                </div>
+                <div class="info-item">
+                    <label>Customer</label>
+                    <span style="text-transform: capitalize; font-size: 0.85rem;"><?php echo htmlspecialchars((string)$customerName); ?></span>
+                </div>
+                <div class="info-item" style="text-align: right;">
+                    <label>Price</label>
+                    <span>RM <?php echo number_format($booking['total_price'], 2); ?></span>
                 </div>
             </div>
 
-            <div class="info-group">
-                <span class="label">Hall</span>
-                <span class="value">
-                    <?php 
-                        $hName = isset($booking['hall_name']) ? $booking['hall_name'] : '-';
-                        echo is_string($hName) ? htmlspecialchars($hName) : 'Cinema Hall';
-                    ?>
-                </span>
-            </div>
-
-            <div class="info-group">
-                <span class="label">Seats</span>
-                <span class="value seats-value">
+            <div class="seats-display">
+                <label>Assigned Seats</label>
+                <span>
                     <?php 
                         if (isset($booking['seats'])) {
-                            if (is_array($booking['seats']) || is_object($booking['seats'])) {
-                                echo htmlspecialchars(implode(", ", (array)$booking['seats']));
-                            } else {
-                                echo htmlspecialchars((string)$booking['seats']);
-                            }
-                        } else {
-                            echo "-";
-                        }
+                            echo is_array($booking['seats']) ? implode(", ", (array)$booking['seats']) : htmlspecialchars((string)$booking['seats']);
+                        } else { echo "-"; }
                     ?>
                 </span>
             </div>
+        </div>
 
-            <div class="info-group" style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 8px; border:none;">
-                <span class="label">Total Amount</span>
-                <span class="value" style="font-size:1.6rem; color:#222; margin-top:5px;">RM <?php echo number_format($booking['total_price'], 2); ?></span>
-            </div>
+        <div class="dashed-line"></div>
 
-            <div class="qr-section">
-                <div id="qrcode" class="qr-box"></div>
-                <div class="ticket-id">Ref: <?php echo $bookingId; ?></div>
-                <p style="font-size:0.7rem; color:#888; margin-top:5px;">Show this QR at the cinema entrance.</p>
+        <div class="ticket-footer">
+            <div class="qr-wrapper">
+                <div id="qrcode"></div>
             </div>
+            <div class="ref-id">ID: <?php echo substr((string)$bookingId, -8); ?></div>
+            <div style="font-size:0.6rem; margin-top:5px; color:#888;">Scan at the entrance</div>
         </div>
     </div>
 </div>
 
-<div class="btn-group">
+<div class="actions">
     <button onclick="downloadPDF()" class="btn btn-download">
-        <i class="fas fa-file-pdf"></i> Download Ticket
+        <i class="fas fa-arrow-down"></i> Save Ticket
     </button>
     <a href="home.php" class="btn btn-home">
-        <i class="fas fa-home"></i> Back to Home
+        Back to Home
     </a>
 </div>
 
 <script>
     const { jsPDF } = window.jspdf;
 
-    // 1. GENERATE QR CODE MASA PAGE LOAD
     window.onload = function() {
         var qrContainer = document.getElementById("qrcode");
-        
-        // Bersihkan kalau ada sisa
         qrContainer.innerHTML = "";
 
-        // Guna library QRCode.js untuk lukis
+        // Generate clean QR Code
         new QRCode(qrContainer, {
             text: "<?php echo (string)$bookingId; ?>",
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
             colorDark : "#000000",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
 
-        // Auto download lepas 1.5 saat (bagi masa QR siap lukis)
-        // Saya komenkan AUTO-DOWNLOAD supaya tak ganggu UX mobile
-        // Kalau nak auto, uncomment baris bawah:
-        
-        setTimeout(function() {
-             downloadPDF(); 
-        }, 1500);
+        // Optional: Auto download after 1.5s
+        // setTimeout(downloadPDF, 1500);
     };
 
     function downloadPDF() {
-        const ticketContainer = document.querySelector('.ticket-container');
-
-        // Tak perlu risau pasal CORS sebab QR ni local punya
-        html2canvas(ticketContainer, {
-            scale: 2,
-            backgroundColor: "#ffffff",
+        const ticketElement = document.getElementById('ticketToPrint');
+        
+        // Temporarily remove border-radius for cleaner edge capture if needed, 
+        // but html2canvas usually handles it fine.
+        
+        html2canvas(ticketElement, {
+            scale: 3, // High resolution
+            useCORS: true,
+            backgroundColor: "#151515", // Ensure dark background in PDF
             logging: false
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
-            const doc = new jsPDF('p', 'mm', 'a4'); 
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Calculate center position
+            const pdfWidth = pdf.internal.pageSize.getWidth();
             const imgWidth = 80; 
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const xPos = (210 - imgWidth) / 2;
-            const yPos = 20; 
+            const xPos = (pdfWidth - imgWidth) / 2;
+            const yPos = 30;
 
-            doc.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
-            doc.save('MisaCinema-Ticket-<?php echo $bookingId; ?>.pdf');
-        }).catch(err => {
-            console.error("Error generating PDF:", err);
-            alert("Failed to generate PDF. Check console for details.");
+            pdf.setFillColor(20, 20, 20); // Dark grey background for PDF paper
+            pdf.rect(0, 0, pdfWidth, 297, 'F');
+            
+            pdf.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
+            pdf.save('MisaCinema-<?php echo substr((string)$bookingId, -6); ?>.pdf');
         });
     }
 </script>
+
 <?php include 'footer.php'; ?>
 </body>
 </html>

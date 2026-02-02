@@ -83,75 +83,161 @@ if (!isset($_GET['showtime_id']) || !$selectedShowtime) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select Time - <?php echo $movieTitle; ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #0b0b0b; color: white; font-family: 'Roboto', sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; width: 100%; }
-        h1 { color: #e50914; text-align: center; text-transform: uppercase; font-size: 1.8em; }
-        .date-section { margin-bottom: 30px; }
-        .date-header { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; color: #ddd; font-size: 1.1em; }
-        .time-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .time-btn { 
-            background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 6px; 
-            text-decoration: none; min-width: 130px; transition: 0.2s; position: relative; display: block; text-align: center;
+        :root {
+            --primary: #e50914;
+            --dark-bg: #0a0a0a;
+            --card-bg: #161616;
+            --text-main: #fff;
+            --text-sub: #aaa;
         }
-        .time-btn:hover { background: #e50914; transform: translateY(-3px); border-color: #e50914; }
-        .t-time { font-size: 1.2em; font-weight: bold; display: block; }
-        .t-hall { font-size: 0.8em; color: #aaa; margin-top: 5px; display: block; }
-        .hall-badge { position: absolute; top: 0; right: 0; font-size: 0.6em; padding: 2px 5px; background: #333; }
-        .vip { background: gold; color: black; }
-        .imax { background: #007bff; color: white; }
+
+        body { 
+            background: var(--dark-bg); 
+            color: var(--text-main); 
+            font-family: 'Montserrat', sans-serif; 
+            padding: 0; margin: 0; 
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 40px 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Header */
+        h1 { 
+            color: white; 
+            text-align: center; 
+            text-transform: uppercase; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+        }
+        
+        .sub-header {
+            text-align: center; 
+            color: var(--text-sub);
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        /* Date Section */
+        .date-section { margin-bottom: 40px; }
+        .date-header { 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+            color: var(--primary); 
+            font-size: 1.1rem; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .date-header i { color: white; }
+
+        /* Time Grid */
+        .time-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+            gap: 15px; 
+        }
+
+        /* Buttons */
+        .time-btn { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: white; 
+            padding: 20px 15px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .time-btn:hover { 
+            background: rgba(229, 9, 20, 0.1); 
+            transform: translateY(-5px); 
+            border-color: var(--primary); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .t-time { font-size: 1.4rem; font-weight: 700; display: block; margin-bottom: 5px; }
+        .t-hall { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        .t-price { font-size: 0.85rem; color: #46d369; margin-top: 8px; font-weight: 600; }
+
+        /* Badges */
+        .hall-badge { 
+            position: absolute; top: 0; right: 0; left: 0;
+            font-size: 0.6rem; padding: 4px; 
+            text-align: center;
+            font-weight: 800; letter-spacing: 1px;
+        }
+        .vip { background: linear-gradient(90deg, #FFD700, #FFA500); color: black; }
+        .imax { background: linear-gradient(90deg, #007bff, #00c6ff); color: white; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         /* Mobile Adjustments */
         @media (max-width: 600px) {
-            .time-btn { width: 100%; /* Full width buttons on phone */ }
-            h1 { font-size: 1.5em; }
+            .time-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1><?php echo $movieTitle; ?></h1>
-        <p style="text-align:center; color:#777;">Select Show Time</p>
+        <div class="sub-header">Select Show Time</div>
         
         <?php if(empty($groupedShows)): ?>
-            <div style="text-align:center; margin-top:50px; color:#555;">
-                <h3>No upcoming showtimes available.</h3>
-                <a href="home.php" style="color:#e50914;">Back to Home</a>
+            <div style="text-align:center; margin-top:80px; color:#555; padding: 40px; border: 1px dashed #333; border-radius: 10px;">
+                <i class="far fa-clock" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h3>No upcoming showtimes</h3>
+                <a href="home.php" style="color:var(--primary); text-decoration: none; font-weight: bold;">Back to Home</a>
             </div>
         <?php endif; ?>
 
         <?php foreach ($groupedShows as $date => $shows): 
             $dateObj = new DateTime($date);
-            $label = $dateObj->format('l, d M Y');
+            $label = $dateObj->format('D, d M Y');
         ?>
         <div class="date-section">
-            <div class="date-header"><strong><?php echo $label; ?></strong></div>
+            <div class="date-header"><i class="far fa-calendar-alt"></i> <?php echo $label; ?></div>
             <div class="time-grid">
                 <?php foreach ($shows as $s): 
                     $timeObj = new DateTime($s['datetime']);
                     
-                    // --- PRICE LOGIC FOR BUTTON ---
+                    // --- PRICE LOGIC ---
                     $hallType = 'std';
                     if (stripos($s['hall'], 'IMAX') !== false) $hallType = 'imax';
                     if (stripos($s['hall'], 'VIP') !== false) $hallType = 'vip';
 
                     $displayPrice = $s['price']; 
-                    if ($hallType == 'vip') {
-                        $displayPrice += 30;
-                    } elseif ($hallType == 'imax') {
-                        $displayPrice += 15;
-                    }
+                    if ($hallType == 'vip') { $displayPrice += 30; } 
+                    elseif ($hallType == 'imax') { $displayPrice += 15; }
                 ?>
                 <a href="booking.php?showtime_id=<?php echo $s['_id']; ?>" class="time-btn">
                     <?php if($hallType != 'std') echo "<div class='hall-badge $hallType'>".strtoupper($hallType)."</div>"; ?>
-                    
                     <span class="t-time"><?php echo $timeObj->format('h:i A'); ?></span>
                     <span class="t-hall"><?php echo $s['hall']; ?></span>
-                    
-                    <div style="font-size:0.8em; color:#00ff7f; margin-top:3px;">
-                        RM <?php echo number_format($displayPrice, 2); ?>
-                    </div>
+                    <span class="t-price">RM <?php echo number_format($displayPrice, 2); ?></span>
                 </a>
                 <?php endforeach; ?>
             </div>
@@ -177,10 +263,10 @@ $chargeLabel = "";
 
 if (stripos($hallName, 'VIP') !== false) { 
     $extraCharge = 30; 
-    $chargeLabel = "(VIP Surcharge +RM30)";
+    $chargeLabel = "(VIP)";
 } elseif (stripos($hallName, 'IMAX') !== false) { 
     $extraCharge = 15; 
-    $chargeLabel = "(IMAX Surcharge +RM15)";
+    $chargeLabel = "(IMAX)";
 }
 
 $finalPrice = $basePrice + $extraCharge;
@@ -188,13 +274,13 @@ $finalPrice = $basePrice + $extraCharge;
 // CONFIG SEAT LAYOUT
 if (stripos($hallName, 'VIP') !== false) { 
     $rows = 5; $cols = 8; $gapIndex = 4; // VIP
-    $seatSize = '40px';
+    $seatSize = '45px';
 } elseif (stripos($hallName, 'IMAX') !== false) { 
     $rows = 12; $cols = 14; $gapIndex = 7; // IMAX
-    $seatSize = '28px'; 
+    $seatSize = '30px'; 
 } else { 
     $rows = 8; $cols = 10; $gapIndex = 5; // Standard
-    $seatSize = '32px';
+    $seatSize = '34px';
 }
 
 // FETCH BOOKED SEATS
@@ -218,133 +304,206 @@ foreach ($existingBookings as $b) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Select Seats - <?php echo $movieTitle; ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --primary: #e50914;
+            --dark-bg: #0a0a0a;
+            --seat-avail: #3a3a3a;
+            --seat-hover: #666;
+            --seat-selected: #e50914;
+            --glass-bar: rgba(20, 20, 20, 0.9);
+        }
+
         body { 
-            background-color: #0b0b0b; 
+            background-color: var(--dark-bg); 
+            background-image: radial-gradient(circle at 50% 0%, #2a0a0a 0%, #0a0a0a 60%);
             color: white; 
-            font-family: 'Roboto', sans-serif; 
+            font-family: 'Montserrat', sans-serif; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             min-height: 100vh; 
             margin: 0;
-            overflow-x: hidden; /* Prevent body scroll, only hall scrolls */
+            overflow-x: hidden; 
+        }
+        
+        .header-info {
+            text-align: center;
+            margin-top: 30px;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        
+        .header-info h2 {
+            margin: 0;
+            text-transform: uppercase; 
+            font-size: 1.4rem; 
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .meta-details {
+            display: flex; gap: 15px; justify-content: center;
+            font-size: 0.85rem; color: #ccc; margin-top: 10px;
+        }
+        .meta-details span { display: flex; align-items: center; gap: 5px; }
+        .meta-details i { color: var(--primary); }
+
+        /* --- THE SCREEN --- */
+        .screen-container {
+            perspective: 800px;
+            margin: 30px auto 40px;
+            width: 80%;
+            max-width: 500px;
+            display: flex; justify-content: center;
         }
         
         .screen { 
-            background: linear-gradient(to bottom, #fff, rgba(255,255,255,0)); 
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0)); 
             height: 60px; 
-            width: 80%; /* Responsive width */
-            max-width: 400px;
-            transform: perspective(300px) rotateX(-10deg); 
-            box-shadow: 0 20px 50px rgba(255,255,255,0.1); 
-            margin: 20px auto 40px; 
-            border-radius: 8px; 
-            text-align:center; color:#000; line-height:50px; font-weight:bold; letter-spacing: 5px; opacity: 0.7;
+            width: 100%; 
+            transform: rotateX(-20deg) scale(0.9); 
+            box-shadow: 0 30px 50px rgba(255,255,255,0.15); 
+            border-radius: 12px; 
+            opacity: 0.8;
+            position: relative;
         }
-        
-        /* --- MOBILE RESPONSIVE HALL (Horizontal Scroll) --- */
-        .cinema-hall { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            align-items: center; 
-            padding-bottom: 140px; 
-            
-            /* Magic for Mobile */
-            width: 100%;
-            overflow-x: auto; /* Allows scrolling left/right */
-            padding-left: 20px; 
-            padding-right: 20px;
-            box-sizing: border-box;
+        .screen::after {
+            content: "SCREEN";
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: black; font-weight: 800; letter-spacing: 5px; font-size: 0.8rem;
+            opacity: 0.5;
         }
 
-        .row { 
-            display: flex; 
-            gap: 6px; 
-            width: max-content; /* Force row to stay wide (no wrapping) */
-            margin: 0 auto; /* Center if it fits */
+        /* --- LEGEND --- */
+        .legend {
+            display: flex; gap: 20px; margin-bottom: 20px; 
+            font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;
+            justify-content: center;
         }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 4px; }
         
+        /* --- SEATS --- */
+        .cinema-hall { 
+            display: flex; flex-direction: column; gap: 8px; align-items: center; 
+            padding-bottom: 140px; width: 100%; overflow-x: auto; 
+            padding-left: 20px; padding-right: 20px; box-sizing: border-box;
+            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        }
+
+        .row { display: flex; gap: 8px; width: max-content; margin: 0 auto; }
+        .row-label { 
+            width: 20px; display: flex; align-items: center; justify-content: center; 
+            color: #555; font-size: 0.7rem; font-weight: bold;
+        }
+
         .seat { 
             width: <?php echo $seatSize; ?>; height: <?php echo $seatSize; ?>; 
-            background: #444; border-radius: 6px 6px 2px 2px; 
+            background: var(--seat-avail); 
+            border-radius: 8px 8px 4px 4px; /* Chair shape */
             cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            font-size: 0.7em; user-select: none;
-            transition: 0.2s;
-            flex-shrink: 0; /* Prevent seat from shrinking on phone */
+            font-size: 0.65rem; color: rgba(255,255,255,0.3); font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 4px 0 #222; /* 3D effect */
         }
-        .seat:hover { background: #777; }
-        .seat.selected { background: #e50914; color: white; box-shadow: 0 0 10px #e50914; }
-        .seat.occupied { background: #222; color: #444; cursor: not-allowed; pointer-events: none; border: 1px solid #333; }
         
+        .seat:hover { background: var(--seat-hover); transform: translateY(-2px); color: white; }
+        
+        .seat.selected { 
+            background: var(--seat-selected); 
+            color: white; 
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.6), 0 4px 0 #900;
+            transform: translateY(-4px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        
+        .seat.occupied { 
+            background: #1a1a1a; 
+            color: #333; cursor: not-allowed; pointer-events: none; 
+            box-shadow: none; border: 1px solid #333;
+        }
+        .seat.occupied::after { content: 'X'; font-size: 10px; }
+
         .aisle-gap { width: 30px; flex-shrink: 0; }
         
+        /* --- BOTTOM BAR --- */
         .booking-bar { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #151515; padding: 15px 20px; 
-            border-top: 2px solid #e50914; display: flex; justify-content: space-between; align-items: center; 
-            box-sizing: border-box; z-index: 100;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 600px;
+            background: var(--glass-bar); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 15px 25px; 
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            z-index: 100;
+            animation: slideUp 0.5s ease-out;
         }
-        .info-text { font-size: 0.9em; color: #ccc; }
-        .info-text span { color: white; font-weight: bold; }
         
-        .btn-pay { 
-            background: #e50914; color: white; border: none; padding: 12px 20px; 
-            font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 0.9em; text-transform: uppercase;
-            transition: 0.3s;
-        }
-        .btn-pay:disabled { background: #333; color: #555; cursor: not-allowed; }
-        .btn-pay:hover:not(:disabled) { background: #ff0f1f; }
+        @keyframes slideUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 
-        /* Scrollbar styling */
-        .cinema-hall::-webkit-scrollbar { height: 6px; }
-        .cinema-hall::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .info-col { display: flex; flex-direction: column; justify-content: center; }
+        .seats-text { color: #888; font-size: 0.75rem; margin-bottom: 2px; }
+        .selected-seats-list { color: white; font-weight: 700; font-size: 0.9rem; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .price-tag { font-size: 1.2rem; font-weight: 800; color: #46d369; margin-left: 15px; margin-right: auto; }
+
+        .btn-pay { 
+            background: white; color: var(--primary); 
+            border: none; padding: 12px 30px; 
+            font-weight: 800; border-radius: 30px; 
+            cursor: pointer; font-size: 0.9rem; text-transform: uppercase;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+        .btn-pay:disabled { background: #333; color: #555; cursor: not-allowed; box-shadow: none; }
+        .btn-pay:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 8px 20px rgba(255,255,255,0.4); }
+
+        /* Scrollbar */
+        .cinema-hall::-webkit-scrollbar { height: 4px; }
+        .cinema-hall::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
     </style>
 </head>
 <body>
-    <h2 style="margin-top:20px; text-transform:uppercase; font-size: 1.5em; text-align:center; padding: 0 10px;"><?php echo $movieTitle; ?></h2>
-    
-    <div style="text-align:center;">
-        <p style="color:#e50914; margin: 0; font-weight:bold; font-size:1.1em;"><?php echo $hallName; ?></p>
-        <p style="color:#777; font-size:0.9em; margin-top:5px;"><?php echo $displayDateTime; ?></p>
-        
-        <p style="margin-top:5px; color:#00ff7f;">
-            Ticket Price: RM <?php echo number_format($finalPrice, 2); ?> 
-            <?php if($extraCharge > 0): ?>
-                <span style="color:#aaa; font-size:0.8em;"><?php echo $chargeLabel; ?></span>
-            <?php endif; ?>
-        </p>
-    </div>
-    
-    <div class="screen">SCREEN</div>
-    
-    <div style="display:flex; gap: 15px; margin-bottom: 20px; font-size: 0.8em; color: #aaa; flex-wrap: wrap; justify-content: center;">
-        <div style="display:flex; align-items:center; gap:5px;"><div style="width:15px; height:15px; background:#444; border-radius:2px;"></div> Available</div>
-        <div style="display:flex; align-items:center; gap:5px;"><div style="width:15px; height:15px; background:#e50914; border-radius:2px;"></div> Selected</div>
-        <div style="display:flex; align-items:center; gap:5px;"><div style="width:15px; height:15px; background:#222; border:1px solid #333; border-radius:2px;"></div> Booked</div>
-    </div>
 
-    <div style="font-size: 0.7em; color: #555; margin-bottom: 10px; display: none;" id="scrollHint">
-        <i class="fas fa-arrows-alt-h"></i> Swipe to see more seats
+    <div class="header-info">
+        <h2><?php echo $movieTitle; ?></h2>
+        <div class="meta-details">
+            <span><i class="far fa-calendar"></i> <?php echo $displayDateTime; ?></span>
+            <span><i class="fas fa-couch"></i> <?php echo $hallName; ?> <?php echo $extraCharge > 0 ? $chargeLabel : ''; ?></span>
+        </div>
     </div>
-    <script>if(window.innerWidth < 600) document.getElementById('scrollHint').style.display = 'block';</script>
+    
+    <div class="screen-container">
+        <div class="screen"></div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--seat-avail)"></div> Available</div>
+        <div class="legend-item"><div class="dot" style="background:var(--seat-selected); box-shadow:0 0 5px red;"></div> Selected</div>
+        <div class="legend-item"><div class="dot" style="background:#1a1a1a; border:1px solid #333"></div> Sold</div>
+    </div>
 
     <div class="cinema-hall">
         <?php 
         for ($r = 0; $r < $rows; $r++) {
             $rowLetter = chr(65 + $r); // A, B, C...
             echo "<div class='row'>"; 
-            echo "<div style='width:20px; display:flex; align-items:center; justify-content:center; color:#555; font-size:0.7em; margin-right:5px;'>$rowLetter</div>"; // Row Label
+            echo "<div class='row-label'>$rowLetter</div>"; 
             for ($c = 1; $c <= $cols; $c++) {
                 if ($c == $gapIndex + 1) echo "<div class='aisle-gap'></div>";
                 
                 $seatLabel = $rowLetter . $c;
                 $isOccupied = in_array($seatLabel, $bookedSeats) ? 'occupied' : '';
                 
-                echo "<div class='seat $isOccupied' data-seat='$seatLabel'>$seatLabel</div>";
+                echo "<div class='seat $isOccupied' data-seat='$seatLabel'>$c</div>";
             }
             echo "</div>";
         }
@@ -361,12 +520,14 @@ foreach ($existingBookings as $b) {
         <input type="hidden" name="total_price" id="inputPrice">
 
         <div class="booking-bar">
-            <div class="info-text">
-                Seats: <span id="seatList" style="color:#e50914">-</span> <br>
-                Total: <span style="color:#00ff7f; font-size: 1.1em;">RM <span id="totalDisplay">0.00</span></span>
+            <div class="info-col">
+                <div class="seats-text">Selected Seats</div>
+                <div class="selected-seats-list" id="seatList">-</div>
             </div>
             
-            <button type="submit" class="btn-pay" id="payBtn" disabled>Select</button>
+            <div class="price-tag">RM <span id="totalDisplay">0.00</span></div>
+            
+            <button type="submit" class="btn-pay" id="payBtn" disabled>Book <i class="fas fa-arrow-right"></i></button>
         </div>
     </form>
 
@@ -392,25 +553,26 @@ foreach ($existingBookings as $b) {
         const selected = document.querySelectorAll('.seat.selected');
         const seatsArr = [...selected].map(s => s.getAttribute('data-seat'));
         
-        // Show only first 3 seats + count to save space on mobile
-        if(seatsArr.length > 3) {
-            seatListSpan.innerText = seatsArr.slice(0,3).join(", ") + " +" + (seatsArr.length - 3) + " more";
+        // Update Seat List Text
+        if(seatsArr.length > 0) {
+            seatListSpan.innerText = seatsArr.join(", ");
         } else {
-            seatListSpan.innerText = seatsArr.length > 0 ? seatsArr.join(", ") : "-";
+            seatListSpan.innerText = "-";
         }
         
+        // Calc Price
         const total = seatsArr.length * pricePerTicket;
         totalDisplay.innerText = total.toFixed(2);
         
+        // Update Hidden Inputs
         inputSeats.value = seatsArr.join(",");
         inputPrice.value = total;
         
+        // Enable/Disable Button
         if (seatsArr.length > 0) {
             payBtn.disabled = false;
-            payBtn.innerText = "Pay";
         } else {
             payBtn.disabled = true;
-            payBtn.innerText = "Select";
         }
     }
 </script>
