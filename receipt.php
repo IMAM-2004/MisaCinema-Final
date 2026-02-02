@@ -175,7 +175,7 @@ try {
             <div class="status-msg" id="statusMsg"><i class="fas fa-spinner fa-spin"></i> Auto-downloading in 2s...</div>
             <button onclick="downloadPDF()" class="btn btn-dl">Download Ticket</button>
         </div>
-        <a href="index.php" class="btn btn-back">Back to Home</a>
+        <a href="home.php" class="btn btn-back">Back to Home</a>
     </div>
 
     <script>
