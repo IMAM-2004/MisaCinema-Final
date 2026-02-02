@@ -334,5 +334,6 @@ if (isset($_SESSION['user'])) {
             else nav.classList.remove('scrolled');
         };
     </script>
+    <?php include 'footer.php'; ?>
 </body>
 </html>
