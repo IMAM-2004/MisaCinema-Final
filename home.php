@@ -175,7 +175,7 @@ if (isset($_SESSION['user'])) {
                         <?php 
                         $imgName = $_SESSION['user']['image'] ?? '';
                         $userInitial = strtoupper(substr($_SESSION['user']['fullname'] ?? 'User', 0, 2));
-                        $targetPath = "uploads" . $imgName;
+                        $targetPath = "uploads/" . $imgName;
                         $hasImage = !empty($imgName) && file_exists($targetPath);
                         
                         if ($hasImage): 
