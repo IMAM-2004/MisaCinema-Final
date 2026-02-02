@@ -13,7 +13,7 @@ if (!file_exists('vendor/autoload.php')) {
 require 'vendor/autoload.php'; 
 
 use MongoDB\BSON\ObjectId;
-use MongoDB\Model\BSONArray; // Kita perlu ini untuk fix error tadi
+use MongoDB\Model\BSONArray; 
 
 // --- 3. DATABASE CONNECTION ---
 try {
@@ -41,9 +41,7 @@ try {
     $customerName = 'Guest';
     if (isset($booking['customer_name'])) {
         $dbName = $booking['customer_name'];
-        // Handle jika nama disimpan dalam object/array
         if (is_object($dbName) || is_array($dbName)) {
-            // Tukar BSONDocument ke array biasa jika perlu
             $dbName = (array)$dbName;
             $customerName = $dbName['fullname'] ?? $dbName['username'] ?? 'Valued Customer';
         } else {
@@ -51,21 +49,16 @@ try {
         }
     }
 
-    // --- LOGIC: SEATS (FIXED ERROR HERE) ---
+    // --- LOGIC: SEATS FIX ---
     $seatsDisplay = "-";
     if (isset($booking['seats'])) {
         $rawSeats = $booking['seats'];
-
-        // 1. Jika data adalah BSONArray (Punca Error Tadi), convert ke PHP Array
         if ($rawSeats instanceof BSONArray) {
             $rawSeats = $rawSeats->getArrayCopy();
-        }
-        // 2. Jika data masih object lain, paksa jadi array
-        elseif (is_object($rawSeats)) {
+        } elseif (is_object($rawSeats)) {
             $rawSeats = (array)$rawSeats;
         }
 
-        // 3. Sekarang print
         if (is_array($rawSeats)) {
             $seatsDisplay = implode(", ", $rawSeats);
         } else {
@@ -103,7 +96,6 @@ try {
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* TICKET STYLE */
         .ticket-box {
             background: var(--card); width: 340px; border-radius: 15px;
             overflow: hidden; position: relative;
@@ -132,13 +124,14 @@ try {
         #qrcode { display: inline-block; }
         .id-text { font-family: monospace; font-size: 0.8rem; margin-top: 10px; color: #555; }
 
-        /* BUTTONS */
-        .btn-container { width: 340px; display: flex; flex-direction: column; gap: 10px; }
-        .btn { padding: 15px; border-radius: 50px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; border: none; font-size: 1rem; }
+        .btn-container { width: 340px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+        .btn { padding: 15px; border-radius: 50px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; border: none; font-size: 1rem; width: 100%; display:block; box-sizing:border-box; }
         .btn-dl { background: white; color: black; }
         .btn-dl:hover { background: #eee; transform: translateY(-2px); }
         .btn-back { background: transparent; border: 1px solid #555; color: #aaa; }
         .btn-back:hover { border-color: white; color: white; }
+        
+        .status-msg { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -178,17 +171,28 @@ try {
     </div>
 
     <div class="btn-container">
-        <button onclick="downloadPDF()" class="btn btn-dl">Download Ticket</button>
+        <div>
+            <div class="status-msg" id="statusMsg"><i class="fas fa-spinner fa-spin"></i> Auto-downloading in 2s...</div>
+            <button onclick="downloadPDF()" class="btn btn-dl">Download Ticket</button>
+        </div>
         <a href="index.php" class="btn btn-back">Back to Home</a>
     </div>
 
     <script>
         window.onload = function() {
-            // Generate QR
+            // 1. Generate QR
             new QRCode(document.getElementById("qrcode"), {
                 text: "<?php echo (string)$bookingId; ?>",
                 width: 90, height: 90
             });
+
+            // 2. AUTO DOWNLOAD LOGIC
+            // Tunggu 2000ms (2 saat) baru download
+            setTimeout(function() {
+                downloadPDF();
+                // Tukar text status
+                document.getElementById('statusMsg').innerText = "Download Started!";
+            }, 2000);
         };
 
         function downloadPDF() {
