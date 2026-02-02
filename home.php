@@ -2,6 +2,7 @@
 session_start();
 require 'vendor/autoload.php';
 
+// Pastikan connection string ni betul
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $collection = $client->misacinema_db->shows; 
 $senaraiMovie = $collection->find([]);
@@ -20,68 +21,91 @@ $senaraiMovie = $collection->find([]);
         :root { --primary: #e50914; }
         body { margin: 0; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
 
-        /* --- NAVBAR PREMIUM --- */
+        /* --- NAVBAR PREMIUM & KEMAS --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
-            /* Padding dikurangkan ke 4% supaya nampak lebih luas (edge-to-edge) */
-            padding: 20px 4%; 
+            padding: 20px 4%; /* Padding ngam-ngam */
             position: fixed; width: 100%; top: 0; z-index: 2000;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            transition: 0.5s ease;
-            box-sizing: border-box; /* Pastikan padding tak kacau width */
+            transition: 0.4s ease;
+            box-sizing: border-box;
         }
         .navbar.scrolled { 
-            background: rgba(0,0,0,0.95); 
+            background: rgba(10, 10, 10, 0.95); 
             padding: 12px 4%; 
-            backdrop-filter: blur(10px); 
-            border-bottom: 1px solid #222;
+            backdrop-filter: blur(8px); 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #fff; text-decoration: none; letter-spacing: 1px; }
+        .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #fff; text-decoration: none; letter-spacing: 1.5px; }
         .logo-text span { color: var(--primary); }
         
-        .nav-links { display: flex; align-items: center; gap: 25px; }
-        .nav-links a { color: #fff; text-decoration: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
+        .nav-links { display: flex; align-items: center; gap: 30px; }
+        .nav-links a { 
+            color: #ddd; text-decoration: none; font-weight: 600; font-size: 0.8rem; 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; position: relative;
+        }
+        .nav-links a:hover { color: #fff; }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
+            background-color: var(--primary); transition: 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
 
         /* PROFILE STYLE */
         .profile-wrapper { display: flex; align-items: center; gap: 15px; }
         .profile-box {
-            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary);
+            width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);
             overflow: hidden; display: flex; align-items: center; justify-content: center;
             background: var(--primary); text-decoration: none; color: white; font-weight: 800; transition: 0.3s;
         }
-        .profile-box:hover { transform: scale(1.1); }
+        .profile-box:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--primary); }
         .profile-box img { width: 100%; height: 100%; object-fit: cover; }
         .logout-btn { 
-            color: #fff; background: var(--primary); padding: 5px 15px; border-radius: 4px; 
-            font-size: 0.75rem; text-decoration: none; font-weight: bold; transition: 0.3s;
+            color: #fff !important; background: var(--primary); padding: 6px 18px; border-radius: 4px; 
+            font-size: 0.75rem !important; font-weight: bold; transition: 0.3s; border: 1px solid transparent;
         }
-        .logout-btn:hover { background: #b20710; }
+        .logout-btn:hover { background: transparent; border-color: var(--primary); }
+        .logout-btn::after { display: none; } /* Remove underline effect for button */
 
-        /* --- HERO VIDEO CAROUSEL (FULLSCREEN) --- */
+        /* --- HERO VIDEO CAROUSEL (FIXED) --- */
         .hero-carousel { position: relative; width: 100%; height: 100vh; background: #000; overflow: hidden; }
+        
         .carousel-item {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; visibility: hidden;
-            /* Transition opacity 1.5s supaya video 'blend' masuk smooth gila */
-            transition: opacity 1.5s ease-in-out; 
+            opacity: 0; 
+            visibility: hidden;
+            transition: opacity 1s ease-in-out; /* Laju sikit supaya tak nampak gelap */
+            z-index: 1;
             display: flex; align-items: center; padding: 0 6%;
         }
-        .carousel-item.active { opacity: 1; visibility: visible; }
+        
+        /* Trick: Active item duduk atas, Next item duduk bawah sikit tapi ready */
+        .carousel-item.active { 
+            opacity: 1; 
+            visibility: visible; 
+            z-index: 2; 
+        }
 
         .video-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; filter: brightness(0.4); z-index: -1;
-            background: #000;
+            object-fit: cover; 
+            filter: brightness(0.5); /* Gelapkan sikit supaya tulisan nampak */
+            z-index: -1;
+            background: #000; /* Fallback color */
         }
 
-        .hero-content { position: relative; z-index: 10; max-width: 800px; transform: translateY(20px); transition: 1s; opacity: 0; }
-        .carousel-item.active .hero-content { transform: translateY(0); opacity: 1; } /* Text naik perlahan bila active */
+        .hero-content { position: relative; z-index: 10; max-width: 800px; opacity: 0; transform: translateY(30px); transition: 1s ease-out; }
+        .carousel-item.active .hero-content { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
 
-        .hero-content h1 { font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 0; line-height: 0.9; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-        .hero-content p { font-size: 1.2rem; margin-bottom: 30px; color: #ddd; max-width: 600px; }
-        .hero-btn { background: var(--primary); color: #fff; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1rem; transition: 0.3s; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
-        .hero-btn:hover { background: #ff0f1f; transform: scale(1.05); }
+        .hero-content h1 { font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 0; line-height: 0.9; text-shadow: 2px 2px 20px rgba(0,0,0,0.8); }
+        .hero-content p { font-size: 1.1rem; margin-bottom: 30px; color: #eee; max-width: 600px; font-weight: 400; }
+        
+        .hero-btn { 
+            background: var(--primary); color: #fff; padding: 14px 40px; border-radius: 50px; 
+            text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.3s; 
+            box-shadow: 0 5px 20px rgba(229,9,20,0.5); letter-spacing: 1px;
+        }
+        .hero-btn:hover { background: #f40612; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(229,9,20,0.7); }
 
         /* --- SEARCH & TITLE SECTION --- */
         .section-header {
@@ -97,12 +121,12 @@ $senaraiMovie = $collection->find([]);
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
 
         /* --- MOVIE GRID --- */
-        .container { padding: 60px 4%; min-height: 100vh; background: #000; }
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .movie-card { background: #111; border-radius: 12px; overflow: hidden; position: relative; transition: 0.4s; border: 1px solid #222; }
+        .container { padding: 80px 4% 50px 4%; min-height: 100vh; background: #080808; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .movie-card { background: #141414; border-radius: 8px; overflow: hidden; position: relative; transition: 0.4s; border: 1px solid #222; }
         .movie-card.hidden { display: none; }
         
-        .poster-box { height: 360px; position: relative; overflow: hidden; }
+        .poster-box { height: 330px; position: relative; overflow: hidden; }
         .poster-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
         
         .overlay {
@@ -112,23 +136,23 @@ $senaraiMovie = $collection->find([]);
             opacity: 0; transition: 0.3s;
         }
         .movie-card:hover .overlay { opacity: 1; }
-        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: #444; }
-        .movie-card:hover img { transform: scale(1.1); }
+        .movie-card:hover { transform: scale(1.03); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border-color: #555; }
+        .movie-card:hover img { filter: brightness(0.6); }
         
         .movie-info { padding: 15px; text-align: center; }
-        .movie-title { margin: 0; font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-title { margin: 0; font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 768px) {
             .navbar { padding: 15px 5%; }
+            .nav-links { gap: 15px; }
             .nav-links a:not(.profile-link):not(.logout-btn) { display: none; }
             .hero-content h1 { font-size: 3.5rem; }
-            .hero-carousel { height: 75vh; }
+            .hero-carousel { height: 80vh; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .search-box { width: 100%; }
             .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .poster-box { height: 250px; }
-            .hero-btn { padding: 12px 30px; font-size: 0.9rem; }
+            .poster-box { height: 240px; }
         }
     </style>
 </head>
@@ -158,7 +182,7 @@ $senaraiMovie = $collection->find([]);
 
     <section class="hero-carousel">
         <div class="carousel-item active">
-            <video class="video-bg" loop muted playsinline preload="auto">
+            <video class="video-bg" loop muted playsinline preload="auto" poster="assets/img/poster_placeholder.jpg">
                 <source src="assets/videos/Papa Zola .mp4" type="video/mp4">
             </video>
             <div class="hero-content">
@@ -220,36 +244,47 @@ $senaraiMovie = $collection->find([]);
     </div>
 
     <script>
-        // --- 1. SUPER SMOOTH VIDEO CAROUSEL ---
+        // --- 1. TEKNIK "WAIT FOR PLAY" UNTUK ELAK SANGKUT ---
         let current = 0;
         const items = document.querySelectorAll('.carousel-item');
         const vids = document.querySelectorAll('.video-bg');
 
-        // Play first video immediately
+        // Play video pertama terus
         vids[0].play();
 
         function changeSlide() {
             let next = (current + 1) % items.length;
             
-            // Trick: Play next video BEFORE showing it
-            vids[next].play();
-            
-            // CSS Transition handles the fade in/out
-            items[current].classList.remove('active');
-            items[next].classList.add('active');
+            // 1. Suruh video seterusnya play
+            let playPromise = vids[next].play();
 
-            // Pause old video to save RAM (after transition done)
-            setTimeout(() => {
-                vids[current].pause();
-                current = next;
-            }, 1500); // 1.5s match CSS transition
+            // 2. TUNGGU sampai browser confirm video dah jalan (tak buffering)
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Video dah START play, BARU kita tukar visual
+                    
+                    items[current].classList.remove('active');
+                    items[next].classList.add('active');
+
+                    // 3. Pause video lama lambat sikit (1 saat) supaya transition smooth
+                    setTimeout(() => {
+                        vids[current].pause();
+                        vids[current].currentTime = 0; // Reset video lama ke awal
+                        current = next;
+                    }, 1000); 
+
+                }).catch(error => {
+                    // Kalau video error (takleh load), skip je
+                    console.log("Video error, skipping animation");
+                });
+            }
         }
 
-        // Change every 8 seconds
+        // Tukar setiap 8 saat
         setInterval(changeSlide, 8000);
 
 
-        // --- 2. SEARCH BAR LOGIC ---
+        // --- 2. SEARCH BAR ---
         const searchInput = document.getElementById('movieSearch');
         const cards = document.querySelectorAll('.movie-card');
         const noResult = document.getElementById('noResult');
@@ -257,7 +292,6 @@ $senaraiMovie = $collection->find([]);
         searchInput.addEventListener('keyup', function(e) {
             const term = e.target.value.toLowerCase();
             let visibleCount = 0;
-
             cards.forEach(card => {
                 const title = card.getAttribute('data-title');
                 if(title.includes(term)) {
@@ -270,7 +304,7 @@ $senaraiMovie = $collection->find([]);
             noResult.style.display = (visibleCount === 0) ? 'block' : 'none';
         });
 
-        // --- 3. NAVBAR GLASS EFFECT ---
+        // --- 3. NAVBAR SCROLL EFFECT ---
         window.onscroll = function() {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) nav.classList.add('scrolled');
