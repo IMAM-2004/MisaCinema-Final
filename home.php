@@ -199,6 +199,17 @@ if (isset($_SESSION['user'])) {
         <button class="arrow-btn next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
 
         <div class="carousel-item active">
+            <video class="video-bg" loop muted playsinline preload="auto">
+                <source src="assets/videos/welcome intro .mp4" type="video/mp4">
+            </video>
+            <div class="hero-content">
+                <h1 style="color:var(--primary)">WELCOME TO<br>MISA CINEMA</h1>
+                <p>The ultimate cinematic experience.</p>
+                <a href="#now-showing" class="hero-btn">BROWSE MOVIES</a>
+            </div>
+        </div>
+
+        <div class="carousel-item">
             <video class="video-bg" loop muted playsinline preload="auto" poster="assets/img/poster_placeholder.jpg">
                 <source src="assets/videos/Papa Zola .mp4" type="video/mp4">
             </video>
@@ -269,6 +280,7 @@ if (isset($_SESSION['user'])) {
         const vids = document.querySelectorAll('.video-bg');
         let autoPlayInterval;
 
+        // Ensure the FIRST video (Intro) plays immediately
         if(vids.length > 0) vids[0].play().catch(e => console.log(e));
 
         function showSlide(index) {
