@@ -54,52 +54,268 @@ $myBookings = $collection->find($filter, ['sort' => ['_id' => -1]]);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Bookings - Misa Cinema</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* --- GLOBAL & RESET --- */
-        * { box-sizing: border-box; }
-        body {
-            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url('assets/images/bg_cinema.png');
-            background-size: cover; background-position: center; background-attachment: fixed;
-            color: white; font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; min-height: 100vh;
+        /* --- GOD MODE CSS --- */
+        :root {
+            --primary: #e50914;
+            --primary-glow: rgba(229, 9, 20, 0.5);
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(22, 22, 22, 0.85);
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .header h1 { color: #e50914; margin: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(20, 20, 100, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* --- HEADER --- */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 40px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 { 
+            color: #fff; 
+            margin: 0; 
+            font-size: 2.2rem; 
+            font-weight: 800;
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6); /* Neon Glow */
+        }
+        .header h1 i { color: var(--primary); margin-right: 10px; }
         
-        .btn-back { color: #ccc; text-decoration: none; font-weight: bold; border: 1px solid #444; padding: 8px 15px; border-radius: 4px; transition: 0.3s; font-size: 0.9rem; }
-        .btn-back:hover { background: #333; color: white; border-color: #fff; }
+        .btn-back { 
+            color: var(--text-sub); 
+            text-decoration: none; 
+            font-weight: 600; 
+            padding: 10px 20px; 
+            border-radius: 50px; 
+            background: rgba(255,255,255,0.05);
+            border: var(--glass-border);
+            transition: 0.3s; 
+            font-size: 0.85rem; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-back:hover { 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
 
-        .booking-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; margin-bottom: 20px; display: flex; overflow: hidden; transition: transform 0.2s; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        @media(min-width: 769px) { .booking-card:hover { transform: translateY(-3px); border-color: #555; } }
+        /* --- CARD DESIGN --- */
+        .booking-card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(10px);
+            border: var(--glass-border); 
+            border-radius: 16px; 
+            margin-bottom: 25px; 
+            display: flex; 
+            overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
 
-        .poster-img { width: 140px; background-color: #222; background-size: cover; background-position: center; flex-shrink: 0; }
-        .card-details { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .movie-title { font-size: 1.3rem; font-weight: bold; color: white; margin-bottom: 10px; line-height: 1.2; }
-        .meta-info { color: #aaa; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; }
-        .meta-info i { color: #e50914; margin-right: 10px; width: 20px; text-align: center; }
+        .booking-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            opacity: 0.7;
+        }
 
-        .seats-container { margin-top: 15px; }
-        .seats-badge { background: #333; color: #fff; padding: 4px 8px; border: 1px solid #444; border-radius: 4px; font-size: 0.8rem; margin-right: 4px; margin-bottom: 4px; font-weight: bold; display: inline-block; }
+        .booking-card:hover { 
+            transform: translateY(-5px) scale(1.01); 
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 15px 40px rgba(229, 9, 20, 0.15);
+        }
 
-        .action-section { background: #111; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 170px; border-left: 1px solid #333; }
-        .total-price { color: #2ecc71; font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
-        .status { color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .poster-img { 
+            width: 160px; 
+            background-color: #111; 
+            background-size: cover; 
+            background-position: center; 
+            flex-shrink: 0; 
+            position: relative;
+        }
+        
+        /* Gradient overlay on poster */
+        .poster-img::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(22,22,22,1) 100%);
+        }
 
-        .btn-ticket { background: white; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 30px; font-size: 0.9rem; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
-        .btn-ticket:hover { background: #e50914; color: white; }
+        .card-details { 
+            padding: 25px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            z-index: 2;
+        }
 
+        .movie-title { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            color: white; 
+            margin-bottom: 12px; 
+            line-height: 1.1; 
+            text-transform: uppercase;
+        }
+
+        .meta-info { 
+            color: #ccc; 
+            font-size: 0.95rem; 
+            margin-bottom: 8px; 
+            display: flex; 
+            align-items: center; 
+            font-weight: 500;
+        }
+        .meta-info i { 
+            color: var(--primary); 
+            margin-right: 12px; 
+            width: 20px; 
+            text-align: center; 
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        /* --- SEATS BADGE --- */
+        .seats-container { margin-top: 20px; }
+        .seats-badge { 
+            background: rgba(255,255,255,0.1); 
+            color: #fff; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-size: 0.8rem; 
+            margin-right: 6px; 
+            margin-bottom: 6px; 
+            font-weight: 700; 
+            display: inline-block; 
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .booking-card:hover .seats-badge {
+            background: rgba(229, 9, 20, 0.2);
+            border-color: var(--primary);
+        }
+
+        /* --- ACTION SECTION --- */
+        .action-section { 
+            background: rgba(0,0,0,0.3); 
+            padding: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-width: 200px; 
+            border-left: 1px solid rgba(255,255,255,0.05); 
+            backdrop-filter: blur(5px);
+        }
+
+        .total-price { 
+            color: #fff; 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            margin-bottom: 5px; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .status { 
+            color: #46d369; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 20px; 
+            font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .btn-ticket { 
+            background: linear-gradient(135deg, var(--primary) 0%, #b20710 100%); 
+            color: white; 
+            padding: 12px 25px; 
+            text-decoration: none; 
+            border-radius: 50px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-ticket:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.6);
+            background: white;
+            color: var(--primary);
+        }
+
+        /* --- ANIMATION --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            body { padding: 15px 10px; }
+            body { padding: 20px 15px; }
+            .header { flex-direction: row; margin-bottom: 30px; }
             .header h1 { font-size: 1.5rem; }
+            
             .booking-card { flex-direction: column; }
-            .poster-img { width: 100%; height: 180px; background-position: center 20%; }
-            .card-details { padding: 15px; }
-            .action-section { border-left: none; border-top: 1px solid #333; flex-direction: row; justify-content: space-between; padding: 15px 20px; background: #0a0a0a; }
+            .booking-card::before { width: 100%; height: 4px; top: 0; left: 0; bottom: auto; }
+            
+            .poster-img { width: 100%; height: 200px; background-position: center 20%; }
+            .poster-img::after { background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, var(--card-bg) 100%); }
+            
+            .card-details { padding: 20px; }
+            
+            .action-section { 
+                border-left: none; 
+                border-top: 1px solid rgba(255,255,255,0.1); 
+                flex-direction: row; 
+                justify-content: space-between; 
+                padding: 20px; 
+                background: rgba(0,0,0,0.5);
+            }
             .status { display: none; }
-            .total-price { margin-bottom: 0; font-size: 1.2rem; }
-            .btn-ticket { padding: 8px 16px; font-size: 0.85rem; }
+            .total-price { margin-bottom: 0; font-size: 1.4rem; }
+            .btn-ticket { padding: 10px 20px; font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -107,7 +323,7 @@ $myBookings = $collection->find($filter, ['sort' => ['_id' => -1]]);
 
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-history"></i> My History</h1>
+        <h1><i class="fas fa-ticket-alt"></i> My History</h1>
         <a href="home.php" class="btn-back"><i class="fas fa-arrow-left"></i> Home</a>
     </div>
 
@@ -153,23 +369,25 @@ $myBookings = $collection->find($filter, ['sort' => ['_id' => -1]]);
             </div>
         </div>
         <div class="action-section">
-            <div>
+            <div style="text-align:center; width:100%;">
                 <div class="total-price">RM <?php echo $price; ?></div>
-                <div class="status"><i class="fas fa-check-circle"></i> Paid</div>
+                <div class="status" style="justify-content:center;"><i class="fas fa-check-circle"></i> Paid</div>
             </div>
             <a href="receipt.php?id=<?php echo $bookingId; ?>" target="_blank" class="btn-ticket">
-                <i class="fas fa-ticket-alt"></i> View Ticket
+                View Ticket <i class="fas fa-chevron-right"></i>
             </a>
         </div>
     </div>
     <?php endforeach; ?>
 
     <?php if ($count == 0): ?>
-        <div style="text-align:center; padding:60px 20px; color:#555;">
-            <i class="fas fa-film" style="font-size:3rem; margin-bottom:15px; opacity: 0.5;"></i>
-            <h3>No bookings found</h3>
-            <p style="color: #888;">You haven't booked any movies yet.</p>
-            <a href="home.php" class="btn-ticket" style="display:inline-flex; background:#e50914; color:white; margin-top:15px;">Book Now</a>
+        <div style="text-align:center; padding:100px 20px; color:#555; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="background: rgba(229,9,20,0.1); width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <i class="fas fa-film" style="font-size:3rem; color: var(--primary);"></i>
+            </div>
+            <h3 style="color: white; font-size: 1.5rem; margin-bottom: 10px;">No Bookings Found</h3>
+            <p style="color: #888; max-width: 400px; margin: 0 auto 30px auto;">It looks like you haven't watched any movies lately. Check out what's showing now!</p>
+            <a href="home.php" class="btn-ticket" style="display:inline-flex; padding: 15px 40px;">Book Now</a>
         </div>
     <?php endif; ?>
 </div>
