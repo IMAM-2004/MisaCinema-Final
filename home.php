@@ -2,7 +2,7 @@
 session_start();
 require 'vendor/autoload.php';
 
-// Pastikan connection string ni betul
+// Connection DB
 $client = new MongoDB\Client("mongodb+srv://adminmisa:123@cluster0.sv61lap.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 $collection = $client->misacinema_db->shows; 
 $senaraiMovie = $collection->find([]);
@@ -14,145 +14,196 @@ $senaraiMovie = $collection->find([]);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MISA CINEMA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #e50914; }
-        body { margin: 0; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+        :root { --primary: #e50914; --dark: #0a0a0a; --gray: #808080; }
+        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
 
-        /* --- NAVBAR PREMIUM & KEMAS --- */
+        /* --- NAVBAR --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 4%; /* Padding ngam-ngam */
+            padding: 20px 5%;
             position: fixed; width: 100%; top: 0; z-index: 2000;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
             transition: 0.4s ease;
             box-sizing: border-box;
         }
         .navbar.scrolled { 
             background: rgba(10, 10, 10, 0.95); 
-            padding: 12px 4%; 
-            backdrop-filter: blur(8px); 
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 5%; 
+            backdrop-filter: blur(10px); 
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #fff; text-decoration: none; letter-spacing: 1.5px; }
+        .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: #fff; text-decoration: none; letter-spacing: 2px; text-shadow: 0 0 10px rgba(229, 9, 20, 0.5); }
         .logo-text span { color: var(--primary); }
         
         .nav-links { display: flex; align-items: center; gap: 30px; }
         .nav-links a { 
-            color: #ddd; text-decoration: none; font-weight: 600; font-size: 0.8rem; 
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; position: relative;
+            color: #ddd; text-decoration: none; font-weight: 500; font-size: 0.85rem; 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        .nav-links a:hover { color: #fff; }
-        .nav-links a::after {
-            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
-            background-color: var(--primary); transition: 0.3s;
-        }
-        .nav-links a:hover::after { width: 100%; }
-
-        /* PROFILE STYLE */
-        .profile-wrapper { display: flex; align-items: center; gap: 15px; }
-        .profile-box {
-            width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);
-            overflow: hidden; display: flex; align-items: center; justify-content: center;
-            background: var(--primary); text-decoration: none; color: white; font-weight: 800; transition: 0.3s;
-        }
-        .profile-box:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--primary); }
-        .profile-box img { width: 100%; height: 100%; object-fit: cover; }
-        .logout-btn { 
-            color: #fff !important; background: var(--primary); padding: 6px 18px; border-radius: 4px; 
-            font-size: 0.75rem !important; font-weight: bold; transition: 0.3s; border: 1px solid transparent;
-        }
-        .logout-btn:hover { background: transparent; border-color: var(--primary); }
-        .logout-btn::after { display: none; } /* Remove underline effect for button */
-
-        /* --- HERO VIDEO CAROUSEL (FIXED) --- */
-        .hero-carousel { position: relative; width: 100%; height: 100vh; background: #000; overflow: hidden; }
+        .nav-links a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         
+        /* Highlight active link trick */
+        .nav-links a.active { color: var(--primary); font-weight: 700; }
+
+        /* --- PROFILE POP-UP FIX --- */
+        .profile-wrapper { display: flex; align-items: center; gap: 20px; }
+        
+        .profile-box {
+            width: 42px; height: 42px; 
+            border-radius: 50%; 
+            border: 2px solid var(--primary);
+            overflow: hidden; 
+            display: flex; align-items: center; justify-content: center;
+            background: #222; 
+            text-decoration: none; color: white; font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 rgba(229, 9, 20, 0);
+            position: relative;
+        }
+        /* Pastikan gambar sentiasa fit bulat */
+        .profile-box img { 
+            width: 100%; height: 100%; 
+            object-fit: cover; /* Wajib ada untuk elak gambar gepeng */
+            display: block;
+        }
+        .profile-box:hover { 
+            transform: scale(1.1); 
+            box-shadow: 0 0 15px var(--primary); /* Neon Glow effect */
+            border-color: #fff;
+        }
+
+        .logout-btn { 
+            color: #fff !important; background: transparent; border: 1px solid var(--primary);
+            padding: 6px 20px; border-radius: 30px; 
+            font-size: 0.75rem !important; font-weight: 600; transition: 0.3s;
+        }
+        .logout-btn:hover { background: var(--primary); box-shadow: 0 0 15px rgba(229,9,20,0.6); }
+
+        /* --- HERO --- */
+        .hero-carousel { position: relative; width: 100%; height: 100vh; background: #000; overflow: hidden; }
         .carousel-item {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; 
-            visibility: hidden;
-            transition: opacity 1s ease-in-out; /* Laju sikit supaya tak nampak gelap */
-            z-index: 1;
+            opacity: 0; visibility: hidden; transition: opacity 1s ease-in-out; z-index: 1;
             display: flex; align-items: center; padding: 0 6%;
         }
-        
-        /* Trick: Active item duduk atas, Next item duduk bawah sikit tapi ready */
-        .carousel-item.active { 
-            opacity: 1; 
-            visibility: visible; 
-            z-index: 2; 
-        }
-
-        .video-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; 
-            filter: brightness(0.5); /* Gelapkan sikit supaya tulisan nampak */
-            z-index: -1;
-            background: #000; /* Fallback color */
-        }
-
+        .carousel-item.active { opacity: 1; visibility: visible; z-index: 2; }
+        .video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); z-index: -1; background: #000; }
         .hero-content { position: relative; z-index: 10; max-width: 800px; opacity: 0; transform: translateY(30px); transition: 1s ease-out; }
         .carousel-item.active .hero-content { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
-
-        .hero-content h1 { font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 0; line-height: 0.9; text-shadow: 2px 2px 20px rgba(0,0,0,0.8); }
-        .hero-content p { font-size: 1.1rem; margin-bottom: 30px; color: #eee; max-width: 600px; font-weight: 400; }
-        
+        .hero-content h1 { font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 0; line-height: 0.9; text-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .hero-btn { 
-            background: var(--primary); color: #fff; padding: 14px 40px; border-radius: 50px; 
-            text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.3s; 
-            box-shadow: 0 5px 20px rgba(229,9,20,0.5); letter-spacing: 1px;
+            background: var(--primary); color: #fff; padding: 12px 35px; border-radius: 4px; 
+            text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.3s; text-transform: uppercase;
         }
-        .hero-btn:hover { background: #f40612; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(229,9,20,0.7); }
+        .hero-btn:hover { background: #fff; color: var(--primary); }
 
-        /* --- SEARCH & TITLE SECTION --- */
+        /* --- SUPERB MOVIE GRID --- */
+        .container { padding: 100px 5% 50px 5%; min-height: 100vh; background: #0a0a0a; }
+        
         .section-header {
-            display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap;
-            margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;
         }
+        .section-title { font-family: 'Bebas Neue'; font-size: 3.5rem; color: #fff; margin: 0; letter-spacing: 2px; }
+        .section-title span { color: var(--primary); }
+
         .search-box { position: relative; width: 300px; }
         .search-input { 
-            width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px 12px 45px; 
-            border-radius: 30px; color: white; font-family: 'Montserrat'; outline: none; transition: 0.3s;
+            width: 100%; background: #151515; border: 1px solid #333; padding: 12px 20px 12px 45px; 
+            border-radius: 50px; color: #fff; font-family: 'Montserrat'; outline: none; transition: 0.3s;
         }
-        .search-input:focus { border-color: var(--primary); background: #222; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #777; }
+        .search-input:focus { border-color: var(--primary); background: #222; box-shadow: 0 0 15px rgba(229,9,20,0.2); }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #666; }
 
-        /* --- MOVIE GRID --- */
-        .container { padding: 80px 4% 50px 4%; min-height: 100vh; background: #080808; }
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-        .movie-card { background: #141414; border-radius: 8px; overflow: hidden; position: relative; transition: 0.4s; border: 1px solid #222; }
+        /* GRID SYSTEM */
+        .movie-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 40px 25px; /* Gap AtasBawah 40px, KiriKanan 25px */
+        }
         .movie-card.hidden { display: none; }
-        
-        .poster-box { height: 330px; position: relative; overflow: hidden; }
-        .poster-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
-        
+
+        /* --- CARD DESIGN (NETFLIX STYLE) --- */
+        .movie-card {
+            background: transparent;
+            position: relative;
+            cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .poster-box {
+            height: 320px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: 0.4s ease;
+            border: 2px solid transparent; /* Prepare border for hover */
+        }
+
+        .poster-box img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: 0.6s ease;
+        }
+
+        /* Hover Effects */
+        .movie-card:hover .poster-box {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(229, 9, 20, 0.4); /* Red Glow */
+        }
+        .movie-card:hover img {
+            transform: scale(1.1);
+            filter: brightness(0.4); /* Gelapkan gambar sikit supaya button jelas */
+        }
+
+        /* Content Overlay */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            display: flex; align-items: center; justify-content: center; 
-            opacity: 0; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s ease;
+            padding: 20px; box-sizing: border-box; text-align: center;
         }
-        .movie-card:hover .overlay { opacity: 1; }
-        .movie-card:hover { transform: scale(1.03); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border-color: #555; }
-        .movie-card:hover img { filter: brightness(0.6); }
         
-        .movie-info { padding: 15px; text-align: center; }
-        .movie-title { margin: 0; font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-card:hover .overlay { opacity: 1; }
 
-        /* --- MOBILE RESPONSIVE --- */
+        .overlay h3 {
+            font-family: 'Bebas Neue'; font-size: 1.8rem; letter-spacing: 1px; margin: 0 0 15px 0;
+            transform: translateY(20px); transition: 0.4s; color: #fff;
+        }
+        .movie-card:hover .overlay h3 { transform: translateY(0); }
+
+        .ticket-btn {
+            background: var(--primary); color: white; padding: 10px 25px;
+            border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 0.8rem;
+            transform: translateY(20px); transition: 0.4s 0.1s; /* Delay sikit */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .ticket-btn:hover { background: white; color: var(--primary); }
+        .movie-card:hover .ticket-btn { transform: translateY(0); }
+
+        /* INFO BELOW CARD */
+        .movie-info { padding-top: 12px; }
+        .movie-title-text {
+            font-size: 0.95rem; font-weight: 600; color: #ddd; margin: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: 0.3s;
+        }
+        .movie-card:hover .movie-title-text { color: var(--primary); }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .navbar { padding: 15px 5%; }
-            .nav-links { gap: 15px; }
             .nav-links a:not(.profile-link):not(.logout-btn) { display: none; }
             .hero-content h1 { font-size: 3.5rem; }
-            .hero-carousel { height: 80vh; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .search-box { width: 100%; }
-            .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .poster-box { height: 240px; }
+            .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 15px; }
+            .poster-box { height: 250px; }
         }
     </style>
 </head>
@@ -160,20 +211,26 @@ $senaraiMovie = $collection->find([]);
 
     <nav class="navbar" id="navbar">
         <a href="home.php" class="logo-text">MISA<span>CINEMA</span></a>
+        
         <div class="nav-links">
             <a href="home.php">Home</a>
             <a href="#now-showing">Movies</a>
+            
             <?php if(isset($_SESSION['user'])): ?>
+                <a href="my_booking.php">My Bookings</a>
+
                 <div class="profile-wrapper">
-                    <a href="profile.php" class="profile-box profile-link">
+                    <a href="profile.php" class="profile-box profile-link" title="My Profile">
                         <?php if(!empty($_SESSION['user']['image'])): ?>
-                            <img src="assets/img/profile/<?php echo $_SESSION['user']['image']; ?>">
+                            <img src="assets/img/profile/<?php echo $_SESSION['user']['image']; ?>" 
+                                 onerror="this.style.display='none'; this.parentElement.innerText='<?php echo strtoupper(substr($_SESSION['user']['fullname'], 0, 2)); ?>'">
                         <?php else: ?>
                             <?php echo strtoupper(substr($_SESSION['user']['fullname'], 0, 2)); ?>
                         <?php endif; ?>
                     </a>
                     <a href="logout.php" class="logout-btn">LOGOUT</a>
                 </div>
+
             <?php else: ?>
                 <a href="login.php" class="hero-btn" style="padding: 8px 25px; font-size: 0.8rem;">SIGN IN</a>
             <?php endif; ?>
@@ -218,10 +275,10 @@ $senaraiMovie = $collection->find([]);
     <div class="container" id="now-showing">
         
         <div class="section-header">
-            <h2 style="font-family:'Bebas Neue'; font-size:3rem; margin:0; line-height:1;">Now Showing</h2>
+            <h2 class="section-title">Now <span>Showing</span></h2>
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="movieSearch" class="search-input" placeholder="Search movies...">
+                <input type="text" id="movieSearch" class="search-input" placeholder="Find your movie...">
             </div>
         </div>
 
@@ -229,62 +286,55 @@ $senaraiMovie = $collection->find([]);
             <?php foreach($senaraiMovie as $movie): ?>
                 <div class="movie-card" data-title="<?php echo strtolower($movie['name']); ?>">
                     <div class="poster-box">
-                        <img src="assets/img/<?php echo $movie['image']; ?>">
+                        <img src="assets/img/<?php echo $movie['image']; ?>" alt="<?php echo $movie['name']; ?>">
+                        
                         <div class="overlay">
-                            <a href="booking.php?id=<?php echo $movie['_id']; ?>" class="hero-btn" style="padding:10px 25px; font-size:0.8rem;">BUY TICKET</a>
+                            <h3><?php echo $movie['name']; ?></h3>
+                            <a href="booking.php?id=<?php echo $movie['_id']; ?>" class="ticket-btn">
+                                GET TICKET
+                            </a>
                         </div>
                     </div>
+                    
                     <div class="movie-info">
-                        <h3 class="movie-title"><?php echo $movie['name']; ?></h3>
+                        <p class="movie-title-text"><?php echo $movie['name']; ?></p>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
-        <p id="noResult" style="display:none; text-align:center; color:#666; margin-top:40px;">No movies found.</p>
+        <p id="noResult" style="display:none; text-align:center; color:#666; margin-top:50px; font-size:1.2rem;">Movie not found.</p>
     </div>
 
     <script>
-        // --- 1. TEKNIK "WAIT FOR PLAY" UNTUK ELAK SANGKUT ---
+        // --- 1. VIDEO FIX ---
         let current = 0;
         const items = document.querySelectorAll('.carousel-item');
         const vids = document.querySelectorAll('.video-bg');
 
-        // Play video pertama terus
         vids[0].play();
 
         function changeSlide() {
             let next = (current + 1) % items.length;
-            
-            // 1. Suruh video seterusnya play
             let playPromise = vids[next].play();
 
-            // 2. TUNGGU sampai browser confirm video dah jalan (tak buffering)
             if (playPromise !== undefined) {
                 playPromise.then(_ => {
-                    // Video dah START play, BARU kita tukar visual
-                    
                     items[current].classList.remove('active');
                     items[next].classList.add('active');
 
-                    // 3. Pause video lama lambat sikit (1 saat) supaya transition smooth
                     setTimeout(() => {
                         vids[current].pause();
-                        vids[current].currentTime = 0; // Reset video lama ke awal
+                        vids[current].currentTime = 0;
                         current = next;
                     }, 1000); 
-
                 }).catch(error => {
-                    // Kalau video error (takleh load), skip je
                     console.log("Video error, skipping animation");
                 });
             }
         }
-
-        // Tukar setiap 8 saat
         setInterval(changeSlide, 8000);
 
-
-        // --- 2. SEARCH BAR ---
+        // --- 2. SEARCH ---
         const searchInput = document.getElementById('movieSearch');
         const cards = document.querySelectorAll('.movie-card');
         const noResult = document.getElementById('noResult');
@@ -304,7 +354,7 @@ $senaraiMovie = $collection->find([]);
             noResult.style.display = (visibleCount === 0) ? 'block' : 'none';
         });
 
-        // --- 3. NAVBAR SCROLL EFFECT ---
+        // --- 3. NAVBAR GLASS ---
         window.onscroll = function() {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) nav.classList.add('scrolled');
