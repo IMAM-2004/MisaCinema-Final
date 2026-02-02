@@ -8,30 +8,22 @@ $db = $client->misacinema_db;
 $collection = $db->shows; 
 $senaraiMovie = $collection->find([]);
 
-// --- FIX 1: REFRESH USER DATA (BETULKAN SESSION) ---
+// --- FIX 1: REFRESH USER DATA & SESSION ---
 if (isset($_SESSION['user'])) {
-    $usersCollection = $db->users; // Pastikan nama collection ini betul ('users' atau 'penggunas'?)
+    $usersCollection = $db->users;
     
-    // Ambil ID dengan selamat (Support String atau Object)
+    // Ambil ID dengan selamat
     $tempId = $_SESSION['user']['_id'];
-    if (is_object($tempId)) {
-        $userIdStr = (string)$tempId;
-    } else {
-        $userIdStr = $tempId;
-    }
+    $userIdStr = is_object($tempId) ? (string)$tempId : $tempId;
 
     try {
-        // Cari user fresh dari DB
         $freshUser = $usersCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($userIdStr)]);
-        
         if ($freshUser) {
-            // Update session dengan data fresh
             $_SESSION['user'] = (array)$freshUser;
-            // PENTING: Paksa ID jadi string supaya session tak error nanti
             $_SESSION['user']['_id'] = (string)$freshUser['_id']; 
         }
     } catch (Exception $e) {
-        // Kalau error (contoh: ID tak valid), biarkan session lama
+        // Abaikan error jika ID tidak sah
     }
 }
 ?>
@@ -70,6 +62,9 @@ if (isset($_SESSION['user'])) {
         }
         .nav-links a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         
+        /* Highlight active link */
+        .nav-links a.active { color: var(--primary); font-weight: 700; }
+
         /* --- PROFILE --- */
         .profile-wrapper { display: flex; align-items: center; gap: 20px; }
         .profile-box {
@@ -154,6 +149,7 @@ if (isset($_SESSION['user'])) {
 
         @media (max-width: 768px) {
             .navbar { padding: 15px 5%; }
+            /* Paparkan 'My Bookings' pada mobile juga jika perlu, tapi default biasanya disembunyikan */
             .nav-links a:not(.profile-link):not(.logout-btn) { display: none; }
             .hero-content h1 { font-size: 3.5rem; }
             .arrow-btn { width: 40px; font-size: 1.5rem; }
@@ -172,16 +168,13 @@ if (isset($_SESSION['user'])) {
             <a href="#now-showing">Movies</a>
             
             <?php if(isset($_SESSION['user'])): ?>
+                
                 <a href="my_booking.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_booking.php' ? 'active' : ''; ?>">My Bookings</a>
-
                 <div class="profile-wrapper">
                     <a href="profile.php" class="profile-box profile-link" title="My Profile">
                         <?php 
-                        // --- FIX 2: LOGIC GAMBAR PROFILE LEBIH KETAT ---
                         $imgName = $_SESSION['user']['image'] ?? '';
                         $userInitial = strtoupper(substr($_SESSION['user']['fullname'] ?? 'User', 0, 2));
-                        
-                        // Check path folder
                         $targetPath = "assets/img/profile/" . $imgName;
                         $hasImage = !empty($imgName) && file_exists($targetPath);
                         
@@ -276,7 +269,6 @@ if (isset($_SESSION['user'])) {
         const vids = document.querySelectorAll('.video-bg');
         let autoPlayInterval;
 
-        // Play first video safely
         if(vids.length > 0) vids[0].play().catch(e => console.log(e));
 
         function showSlide(index) {
