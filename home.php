@@ -8,26 +8,30 @@ $db = $client->misacinema_db;
 $collection = $db->shows; 
 $senaraiMovie = $collection->find([]);
 
-// --- FIX 2: REFRESH USER DATA (Supaya gambar profile sentiasa update) ---
+// --- FIX 1: REFRESH USER DATA (BETULKAN SESSION) ---
 if (isset($_SESSION['user'])) {
-    $usersCollection = $db->users; // Pastikan nama collection user betul (users / penggunas)
+    $usersCollection = $db->users; // Pastikan nama collection ini betul ('users' atau 'penggunas'?)
     
-    // Cari user berdasarkan ID dalam session
-    $userId = $_SESSION['user']['_id'];
-    
-    // Tukar string ID jadi ObjectId kalau perlu (bergantung cara save)
-    try {
-        $freshUser = $usersCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($userId)]);
-    } catch (Exception $e) {
-        // Kalau error ID, try cari guna email
-        $freshUser = $usersCollection->findOne(['email' => $_SESSION['user']['email']]);
+    // Ambil ID dengan selamat (Support String atau Object)
+    $tempId = $_SESSION['user']['_id'];
+    if (is_object($tempId)) {
+        $userIdStr = (string)$tempId;
+    } else {
+        $userIdStr = $tempId;
     }
 
-    // Kalau jumpa user updated, update session
-    if ($freshUser) {
-        $_SESSION['user'] = (array)$freshUser;
-        // Mongo object id kena tukar jadi string untuk session kadang-kadang
-        $_SESSION['user']['_id'] = (string)$freshUser['_id'];
+    try {
+        // Cari user fresh dari DB
+        $freshUser = $usersCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($userIdStr)]);
+        
+        if ($freshUser) {
+            // Update session dengan data fresh
+            $_SESSION['user'] = (array)$freshUser;
+            // PENTING: Paksa ID jadi string supaya session tak error nanti
+            $_SESSION['user']['_id'] = (string)$freshUser['_id']; 
+        }
+    } catch (Exception $e) {
+        // Kalau error (contoh: ID tak valid), biarkan session lama
     }
 }
 ?>
@@ -48,16 +52,12 @@ if (isset($_SESSION['user'])) {
         /* --- NAVBAR --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%;
-            position: fixed; width: 100%; top: 0; z-index: 2000;
+            padding: 20px 5%; position: fixed; width: 100%; top: 0; z-index: 2000;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-            transition: 0.4s ease;
-            box-sizing: border-box;
+            transition: 0.4s ease; box-sizing: border-box;
         }
         .navbar.scrolled { 
-            background: rgba(10, 10, 10, 0.95); 
-            padding: 12px 5%; 
-            backdrop-filter: blur(10px); 
+            background: rgba(10, 10, 10, 0.95); padding: 12px 5%; backdrop-filter: blur(10px); 
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: #fff; text-decoration: none; letter-spacing: 2px; text-shadow: 0 0 10px rgba(229, 9, 20, 0.5); }
@@ -107,7 +107,6 @@ if (isset($_SESSION['user'])) {
         }
         .hero-btn:hover { background: #fff; color: var(--primary); }
 
-        /* --- CAROUSEL ARROWS (New) --- */
         .arrow-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0,0,0,0.2); color: rgba(255,255,255,0.7);
@@ -153,7 +152,6 @@ if (isset($_SESSION['user'])) {
         .movie-title-text { font-size: 0.95rem; font-weight: 600; color: #ddd; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.3s; }
         .movie-card:hover .movie-title-text { color: var(--primary); }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) {
             .navbar { padding: 15px 5%; }
             .nav-links a:not(.profile-link):not(.logout-btn) { display: none; }
@@ -179,15 +177,17 @@ if (isset($_SESSION['user'])) {
                 <div class="profile-wrapper">
                     <a href="profile.php" class="profile-box profile-link" title="My Profile">
                         <?php 
-                        // Kita guna fallback: Kalau ada image -> show image. Kalau takde/error -> show huruf
-                        $imgFile = isset($_SESSION['user']['image']) ? $_SESSION['user']['image'] : '';
-                        $userInitial = strtoupper(substr($_SESSION['user']['fullname'], 0, 2));
-                        ?>
+                        // --- FIX 2: LOGIC GAMBAR PROFILE LEBIH KETAT ---
+                        $imgName = $_SESSION['user']['image'] ?? '';
+                        $userInitial = strtoupper(substr($_SESSION['user']['fullname'] ?? 'User', 0, 2));
                         
-                        <?php if(!empty($imgFile)): ?>
-                            <img src="assets/img/profile/<?php echo $imgFile; ?>" 
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                            <span style="display:none;"><?php echo $userInitial; ?></span>
+                        // Check path folder
+                        $targetPath = "assets/img/profile/" . $imgName;
+                        $hasImage = !empty($imgName) && file_exists($targetPath);
+                        
+                        if ($hasImage): 
+                        ?>
+                            <img src="<?php echo $targetPath; ?>?t=<?php echo time(); ?>" alt="Profile">
                         <?php else: ?>
                             <span><?php echo $userInitial; ?></span>
                         <?php endif; ?>
@@ -202,7 +202,6 @@ if (isset($_SESSION['user'])) {
     </nav>
 
     <section class="hero-carousel">
-        
         <button class="arrow-btn prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
         <button class="arrow-btn next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
 
@@ -241,7 +240,6 @@ if (isset($_SESSION['user'])) {
     </section>
 
     <div class="container" id="now-showing">
-        
         <div class="section-header">
             <h2 class="section-title">Now <span>Showing</span></h2>
             <div class="search-box">
@@ -272,32 +270,25 @@ if (isset($_SESSION['user'])) {
     </div>
 
     <script>
-        // --- 1. CAROUSEL LOGIC (AUTO + MANUAL ARROWS) ---
+        // --- 1. CAROUSEL LOGIC ---
         let current = 0;
         const items = document.querySelectorAll('.carousel-item');
         const vids = document.querySelectorAll('.video-bg');
         let autoPlayInterval;
 
-        // Play first video
-        vids[0].play();
+        // Play first video safely
+        if(vids.length > 0) vids[0].play().catch(e => console.log(e));
 
         function showSlide(index) {
-            // Remove active class from current
             items[current].classList.remove('active');
-            
-            // Pause video lama & reset
             vids[current].pause();
             vids[current].currentTime = 0;
 
-            // Update current index
             current = index;
             if (current >= items.length) current = 0;
             if (current < 0) current = items.length - 1;
 
-            // Show next slide
             items[current].classList.add('active');
-            
-            // Play new video
             let playPromise = vids[current].play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => console.log("Video error: ", error));
@@ -305,17 +296,11 @@ if (isset($_SESSION['user'])) {
         }
 
         function moveSlide(direction) {
-            // Stop auto timer bila user tekan manual
             clearInterval(autoPlayInterval);
-            
-            // Pindah slide
             showSlide(current + direction);
-
-            // Start balik timer
             autoPlayInterval = setInterval(() => showSlide(current + 1), 8000);
         }
 
-        // Auto play start
         autoPlayInterval = setInterval(() => showSlide(current + 1), 8000);
 
         // --- 2. SEARCH ---
