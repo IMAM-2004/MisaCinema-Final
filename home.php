@@ -169,7 +169,7 @@ if (isset($_SESSION['user'])) {
             
             <?php if(isset($_SESSION['user'])): ?>
                 
-                <a href="my_booking.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_booking.php' ? 'active' : ''; ?>">My Bookings</a>
+                <a href="my_bookings.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_bookings.php' ? 'active' : ''; ?>">My Bookings</a>
                 <div class="profile-wrapper">
                     <a href="profile.php" class="profile-box profile-link" title="My Profile">
                         <?php 
